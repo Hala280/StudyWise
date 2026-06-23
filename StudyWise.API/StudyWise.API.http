@@ -1,4 +1,4 @@
-@StudyWise.API_HostAddress = http://localhost:5086
+@StudyWise.API_HostAddress = http://localhost:5098
 
 GET {{StudyWise.API_HostAddress}}/weatherforecast/
 Accept: application/json
