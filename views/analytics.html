@@ -1,0 +1,36 @@
+      <div style="margin-bottom:24px;">
+        <div style="font-size:11px;color:var(--purple2);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">✦ Insights</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);">Progress Analytics</div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">Study Hours — Last 4 Weeks</div>
+          </div>
+          <canvas id="hoursChart" height="200"></canvas>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">Subject Distribution</div>
+          </div>
+          <canvas id="pieChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="dash-card" style="margin-bottom:20px;">
+        <div class="dash-card-header">
+          <div class="dash-card-title">Study Heatmap — This Month</div>
+          <button class="card-action">Export →</button>
+        </div>
+        <div class="heatmap-grid" id="heatmapGrid"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:12px;">
+          <span style="font-size:11px;color:var(--text3);">Less</span>
+          <div style="width:14px;height:14px;border-radius:3px;background:var(--input-bg);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.25);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.45);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.65);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,var(--purple),var(--cyan));"></div>
+          <span style="font-size:11px;color:var(--text3);">More</span>
+        </div>
+      </div>

@@ -1,0 +1,104 @@
+      <div style="margin-bottom:24px;">
+        <div style="font-size:11px;color:var(--purple2);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">✦ AI Tool</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;">AI Syllabus Parser</div>
+        <div style="font-size:14px;color:var(--text3);">Upload your syllabus PDF or image — our AI will extract all topics, deadlines, and build your study plan automatically.</div>
+      </div>
+
+      <div class="parser-layout">
+        <div>
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="handleFileSelect(event)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Drop your syllabus here</div>
+            <div class="upload-sub">or click to browse your files</div>
+            <div class="upload-types">
+              <span class="type-tag">PDF</span>
+              <span class="type-tag">PNG</span>
+              <span class="type-tag">JPG</span>
+              <span class="type-tag">DOCX</span>
+            </div>
+          </div>
+
+          <div class="upload-preview" id="uploadPreview">
+            <span class="file-icon" id="previewIcon">📄</span>
+            <div class="file-info">
+              <div class="file-name" id="previewName">syllabus.pdf</div>
+              <div class="file-size" id="previewSize">2.4 MB</div>
+            </div>
+            <button class="file-remove" onclick="removeFile()">✕</button>
+          </div>
+
+          <button class="parse-btn" id="parseBtn" onclick="parseSyllabus()" disabled>
+            🤖 Parse with AI
+          </button>
+
+          <div style="margin-top:18px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;">How it works</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">1</div>
+                <div style="font-size:13px;color:var(--text2);padding-top:5px;">Upload your course syllabus (PDF, image, or Word doc)</div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">2</div>
+                <div style="font-size:13px;color:var(--text2);padding-top:5px;">AI extracts topics, deadlines, exams, and assignments</div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">3</div>
+                <div style="font-size:13px;color:var(--text2);padding-top:5px;">Review the results and add the course to your schedule with one click</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="parser-result">
+          <div class="result-header">
+            <div class="result-icon">✨</div>
+            <div>
+              <div class="result-title">Parsed Results</div>
+              <div class="result-sub">AI-extracted course information</div>
+            </div>
+          </div>
+
+          <div class="result-placeholder" id="resultPlaceholder">
+            <div class="result-placeholder-icon">🤖</div>
+            <div class="result-placeholder-text">Upload a syllabus to see<br>extracted information here</div>
+          </div>
+
+          <div class="parsing-loader" id="parsingLoader">
+            <div class="loader-ring"></div>
+            <div class="loader-text">Analyzing your syllabus…</div>
+            <div class="loader-sub">Extracting topics, deadlines & key dates</div>
+          </div>
+
+          <div class="result-content" id="resultContent">
+            <div class="parsed-course-name" id="parsedCourseName">Advanced Mathematics</div>
+            <div class="parsed-course-info" id="parsedCourseInfo">
+              <span class="info-chip">📅 16 Weeks</span>
+              <span class="info-chip">📝 6 Topics</span>
+              <span class="info-chip">⚠️ 4 Deadlines</span>
+              <span class="info-chip">🎓 3 Credit Hours</span>
+            </div>
+
+            <div class="topics-list">
+              <div class="topics-title">📚 Course Topics</div>
+              <div id="parsedTopics"></div>
+            </div>
+
+            <div class="deadlines-list">
+              <div class="topics-title">⏰ Deadlines & Exams</div>
+              <div id="parsedDeadlines"></div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn-result btn-result-primary" onclick="addParsedCourse()">
+                ✅ Add to My Courses
+              </button>
+              <button class="btn-result btn-result-outline" onclick="resetParser()">
+                🔄 Parse Another
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>

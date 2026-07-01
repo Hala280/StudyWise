@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyWise — Master Your Time, Powered by AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="home.css">
+
+</head>
+<body>
+<!-- ════════════════ NAVBAR ════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">📚</div>
+    <span class="nav-logo-name">StudyWise</span>
+  </div>
+  
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">Home</a>
+    
+    <!-- Mega Menu Dropdown -->
+    <div class="nav-dropdown">
+      <button class="nav-link" style="cursor: pointer;">Features <span style="font-size:9px; margin-left:4px; vertical-align:middle;">▼</span></button>
+      <div class="mega-menu">
+        <a href="smart-scheduler.html" class="mega-card">
+          <div class="mega-icon">📅</div>
+          <div class="mega-text">
+            <h4>Smart Scheduler</h4>
+            <p>Constraint-Based Algorithm</p>
+          </div>
+        </a>
+        <a href="adaptive-logic.html" class="mega-card">
+          <div class="mega-icon">🔄</div>
+          <div class="mega-text">
+            <h4>Adaptive Logic</h4>
+            <p>Auto-Rescheduling Engine</p>
+          </div>
+        </a>
+        <a href="analytics.html" class="mega-card">
+          <div class="mega-icon">📊</div>
+          <div class="mega-text">
+            <h4>Progress Analytics</h4>
+            <p>Study Velocity & Heatmaps</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <a href="ai_syllabus_parser.html" class="nav-link">AI Parser</a>
+    <a href="about.html" class="nav-link">About</a>
+  </div>
+
+  <div class="nav-right">
+    <!-- Shown when NOT logged in -->
+    <div class="auth-group" id="btn-open-auth">
+      <button class="btn-nav-login" onclick="openModal('login')">Log In</button>
+      <button class="btn-nav-register" onclick="openModal('register')">Register Free</button>
+    </div>
+    
+    <!-- Shown when logged in -->
+    <div id="profile-area" style="display:none; position:relative;">
+      <button class="profile-btn" id="profileBtn">
+        <div class="profile-avatar" id="profileAvatar">S</div>
+        <span id="profileName">Student</span>
+        <span class="profile-chevron">▼</span>
+      </button>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-name" id="dropdownName">Student Name</div>
+          <div class="dropdown-email" id="dropdownEmail">student@email.com</div>
+        </div>
+        <button class="dropdown-item"><span>⚙️</span> Account Settings</button>
+        <button class="dropdown-item"><span>📊</span> My Progress</button>
+        <button class="dropdown-item"><span>🏆</span> Achievements</button>
+        <div class="dropdown-divider"></div>
+        <div class="theme-toggle-row">
+          <span class="theme-toggle-label"><span>🌙</span> Dark Mode</span>
+          <div class="toggle-switch on" id="themeToggle" onclick="toggleTheme()">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" onclick="logout()"><span>🚪</span> Sign Out</button>
+      </div>
+    </div>
+    <!-- Theme toggle for non-logged in -->
+    <div id="nav-theme-btn" style="display:flex;align-items:center;">
+      <div class="toggle-switch on" id="themeToggleNav" onclick="toggleTheme()" style="margin-left:8px;">
+        <div class="toggle-knob"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <canvas id="particles"></canvas>
+  <div class="hero-stat-left">
+    <div class="stat-icon">🔥</div>
+    <div class="stat-val">14-day</div>
+    <div class="stat-lbl">Streak</div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-tag"><div class="hero-tag-dot"></div> AI-powered for students</div>
+    <h1 class="hero-title">Master Your Time,<br><span class="grad">Powered by AI.</span></h1>
+    <p class="hero-sub">Personalized study plans, real-time progress tracking, and an AI tutor available 24/7 — everything a student needs to excel.</p>
+    <div class="hero-btns">
+      <button class="btn-primary-hero" onclick="openModal('register')">🚀 Start Learning Free</button>
+      <button class="btn-ghost-hero">▶ Watch Demo</button>
+    </div>
+  </div>
+  <div class="hero-stat-right">
+    <div class="stat-icon">📈</div>
+    <div class="stat-val">Top 3%</div>
+    <div class="stat-lbl">Globally</div>
+  </div>
+  <div class="hero-scroll" onclick="scrollToSection('features')">↓</div>
+</section>
+
+<!-- ════════════════ FEATURES ════════════════ -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div style="text-align:center; margin-bottom:8px;">
+      <div class="section-tag">✦ Why StudyWise?</div>
+    </div>
+    <h2 class="section-title" style="text-align:center">Your Complete <span class="grad">Student Toolkit</span></h2>
+    <p class="section-sub" style="text-align:center; margin:0 auto 0;">Everything you need to plan better, study smarter, and achieve more — all in one place.</p>
+    <div class="features-grid">
+      <div class="feat-card" data-delay="0">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">AI Study Plans</div>
+        <div class="feat-desc">Our AI analyzes your schedule, deadlines, and energy levels to build a personalized daily study plan that actually fits your life.</div>
+      </div>
+      <div class="feat-card" data-delay="150">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Progress Analytics</div>
+        <div class="feat-desc">Visual dashboards show your strengths and gaps. Track hours studied, subjects covered, and improvement over time with beautiful charts.</div>
+      </div>
+      <div class="feat-card" data-delay="300">
+        <div class="feat-icon">👥</div>
+        <div class="feat-title">Study Groups</div>
+        <div class="feat-desc">Join real-time collaborative sessions with peers. Share notes, quiz each other, and grow together in a supportive community.</div>
+      </div>
+      <div class="feat-card" data-delay="450">
+        <div class="feat-icon">🏆</div>
+        <div class="feat-title">Gamification</div>
+        <div class="feat-desc">Earn streaks, unlock badges, and climb leaderboards. Staying consistent has never felt this rewarding and motivating.</div>
+      </div>
+      <div class="feat-card" data-delay="100">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Smart Reminders</div>
+        <div class="feat-desc">Adaptive reminders that know when you're most productive. Your plan adjusts automatically if you miss a session — no guilt trips.</div>
+      </div>
+      <div class="feat-card" data-delay="250">
+        <div class="feat-icon">🎯</div>
+        <div class="feat-title">Goal Tracking</div>
+        <div class="feat-desc">Set your exam dates and target grades. StudyWise reverse-engineers your goals into daily micro-tasks you can actually complete.</div>
+      </div>
+      <div class="feat-card" data-delay="400">
+        <div class="feat-icon">📝</div>
+        <div class="feat-title">AI Note Summarizer</div>
+        <div class="feat-desc">Paste any lecture notes and our AI extracts key concepts, creates flashcards, and generates practice questions in seconds.</div>
+      </div>
+      <div class="feat-card" data-delay="550">
+        <div class="feat-icon">🌙</div>
+        <div class="feat-title">Focus Mode</div>
+        <div class="feat-desc">Distraction-free Pomodoro timer with ambient study sounds. Track your deep work sessions and build a sustainable study habit.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
+<section class="section steps-wrap" id="how">
+  <div class="section-inner">
+    <div style="text-align:center; margin-bottom:8px;"><div class="section-tag">✦ Simple Process</div></div>
+    <h2 class="section-title" style="text-align:center">How to <span class="grad">Get Started</span></h2>
+    <p class="section-sub" style="text-align:center; margin: 0 auto 0;">Three steps to transform how you study forever.</p>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <span class="step-icon">👤</span>
+        <div class="step-title">Create Your Profile</div>
+        <div class="step-desc">Tell us your subjects, exam dates, and how many hours you can study daily. Takes 2 minutes.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <span class="step-icon">🧠</span>
+        <div class="step-title">AI Builds Your Plan</div>
+        <div class="step-desc">Our AI creates a personalized study schedule optimized for your goals, learning style, and available time.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <span class="step-icon">📈</span>
+        <div class="step-title">Track & Improve</div>
+        <div class="step-desc">Follow your plan, track progress daily, and watch your scores improve week over week.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ DASHBOARD PREVIEW ════════════════ -->
+<section class="section" id="preview">
+  <div class="section-inner">
+    <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:60px; align-items:center;">
+      <div>
+        <div class="section-tag">✦ Live Preview</div>
+        <h2 class="section-title">Your Personal <span class="grad">Command Center</span></h2>
+        <p class="section-sub">A beautiful dashboard that puts everything in front of you — no digging around.</p>
+        <div class="annotations" style="margin-top:28px;">
+          <div class="annotation" data-delay="0">
+            <div class="annotation-dot"></div>
+            <div class="annotation-text"><strong>Smart task adaptation</strong> — your plan adjusts automatically if something comes up.</div>
+          </div>
+          <div class="annotation" data-delay="200">
+            <div class="annotation-dot"></div>
+            <div class="annotation-text"><strong>Color-coded subjects</strong> — instant visual clarity across all your courses.</div>
+          </div>
+          <div class="annotation" data-delay="400">
+            <div class="annotation-dot"></div>
+            <div class="annotation-text"><strong>Daily streak calendar</strong> — build momentum and protect your winning streak.</div>
+          </div>
+          <div class="annotation" data-delay="600">
+            <div class="annotation-dot"></div>
+            <div class="annotation-text"><strong>AI insights</strong> — weekly tips on what to focus on next for maximum impact.</div>
+          </div>
+        </div>
+      </div>
+      <div class="mockup-wrap">
+        <div class="mockup-glow"></div>
+        <div class="mockup-frame" id="mockupFrame">
+          <div class="mockup-bar">
+            <div class="mockup-dots-row">
+              <div class="mockup-dot" style="background:#ff5f56"></div>
+              <div class="mockup-dot" style="background:#ffbd2e"></div>
+              <div class="mockup-dot" style="background:#27c93f"></div>
+            </div>
+            <div class="mockup-url">app.studywise.io/dashboard</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mock-row">
+              <div class="mock-card"><div class="mock-label">Study Hours</div><div class="mock-val" style="color:var(--purple2)">47.5h</div></div>
+              <div class="mock-card"><div class="mock-label">Streak</div><div class="mock-val" style="color:#f59e0b">🔥 14</div></div>
+              <div class="mock-card"><div class="mock-label">Rank</div><div class="mock-val" style="color:var(--green)">#23</div></div>
+            </div>
+            <div class="mock-bar-wrap">
+              <div class="mock-bar-label"><span>Mathematics</span><span style="color:var(--purple2);font-weight:700">82%</span></div>
+              <div class="mock-track"><div class="mock-fill math"></div></div>
+            </div>
+            <div class="mock-bar-wrap" style="margin-top:10px">
+              <div class="mock-bar-label"><span>Physics</span><span style="color:var(--cyan);font-weight:700">67%</span></div>
+              <div class="mock-track"><div class="mock-fill science"></div></div>
+            </div>
+            <div class="mock-bar-wrap" style="margin-top:10px">
+              <div class="mock-bar-label"><span>English</span><span style="color:#f472b6;font-weight:700">91%</span></div>
+              <div class="mock-track"><div class="mock-fill english"></div></div>
+            </div>
+            <div class="mock-bar-wrap" style="margin-top:10px">
+              <div class="mock-bar-label"><span>History</span><span style="color:#fbbf24;font-weight:700">55%</span></div>
+              <div class="mock-track"><div class="mock-fill history"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FAQ ════════════════ -->
+<section class="section faq-section" id="faq">
+  <div class="section-inner">
+    <div class="faq-layout">
+      <div>
+        <div class="section-tag">✦ FAQ</div>
+        <h2 class="section-title">Study Secrets <span class="grad">Answered</span></h2>
+        <div class="faq-left-img" style="margin-top:28px;">
+          <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80" alt="Student studying">
+        </div>
+      </div>
+      <div class="faq-items">
+        <div class="faq-item open">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What happens if I miss a study day?
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">No problem! StudyWise automatically redistributes your missed content over the coming days without overloading you. The AI recalculates your plan in real-time so you stay on track toward your goals.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Can I edit the AI-generated schedule manually?
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">Absolutely! You have full control. Drag, drop, resize, or delete any task in your schedule. The AI learns from your edits and gets smarter at predicting your preferences over time.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How does the AI tutor work?
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">Our AI tutor is available 24/7 in the chat. Ask it to explain any concept, generate practice questions, check your answers, or summarize a topic. It's powered by advanced AI and tailored to your curriculum.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Is StudyWise free to use?
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">Yes! The core features including AI study plans, progress tracking, and the AI tutor are completely free. Premium features like advanced analytics, unlimited AI queries, and collaborative study rooms are available on our Pro plan.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Which subjects does StudyWise support?
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">StudyWise supports all academic subjects across high school and university level including STEM, humanities, languages, business, medicine, and law. You can add any custom subject too.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How accurate are the AI study predictions?
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">Our AI gets smarter the more you use it. After just 2 weeks, predictions for study time and difficulty are typically 85%+ accurate. We analyze thousands of data points from students with similar profiles.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ CTA BANNER ════════════════ -->
+<section class="cta-banner">
+  <h2>Ready to Transform Your Studies?</h2>
+  <p>Join 50,000+ students who already study smarter, not harder.</p>
+  <button class="btn-cta" onclick="openModal('register')">🚀 Get Started Free →</button>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:0">
+          <div class="nav-logo-icon">📚</div>
+          <span class="nav-logo-name">StudyWise</span>
+        </div>
+        <p>AI-powered learning companion helping students worldwide achieve their academic goals through smart planning and personalized study.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#">Features</a><a href="#">AI Tutor</a><a href="#">Study Groups</a><a href="#">Mobile App</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#">Study Tips Blog</a><a href="#">Help Center</a><a href="#">API Docs</a><a href="#">Community</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About Us</a><a href="#">Careers</a><a href="#">Privacy</a><a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 StudyWise. All rights reserved.</span>
+      <span class="footer-quote" id="footerQuote"></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════ CHAT ASSISTANT ════════════════ -->
+<div class="chat-wrap">
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar">🤖</div>
+        <div>
+          <div class="chat-header-name">StudyWise AI Tutor</div>
+          <div class="chat-header-status">● Online — Powered by Gemini</div>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg bot">👋 Hi! I'm your AI Study Tutor. Ask me anything — concepts, summaries, practice questions, or study tips!</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+  <button class="chat-btn" onclick="toggleChat()">
+    <div class="chat-pulse"></div>
+    <div class="chat-badge"></div>
+    🤖
+  </button>
+</div>
+
+<!-- ════════════════ AUTH MODAL ════════════════ -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo">
+      <div class="modal-logo-icon">📚</div>
+      <span class="modal-logo-name">StudyWise</span>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+      <button class="modal-tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="mpage active" id="mpage-login">
+      <div class="modal-greeting-tag"><div class="modal-greeting-dot"></div><span id="greet-label">First visit</span></div>
+      <div class="modal-title" id="greet-title">Welcome to <span class="grad">StudyWise!</span></div>
+      <div class="modal-sub" id="greet-sub">New here? <a onclick="switchTab('register')">Create a free account →</a></div>
+      <div class="modal-oauth">
+        <button class="modal-oauth-btn">
+          <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.5c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.6 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.2-8 2.2-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.8 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.7c-.5-1.4-.7-2.9-.7-4.7s.2-3.3.7-4.7v-6.2H2.7C1 16.5 0 20.1 0 24s1 7.5 2.7 10.9l8.1-6.2z"/><path fill="#EA4335" d="M24 9.5c3.4 0 6.5 1.2 8.9 3.5l6.6-6.6C35.9 2.5 30.4 0 24 0 14.8 0 6.7 5.2 2.7 13.1l8.1 6.2c1.9-5.5 7.1-9.6 13.1-9.6z"/></svg>
+          Google
+        </button>
+        <button class="modal-oauth-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </button>
+      </div>
+      <div class="modal-divider"><div class="modal-div-line"></div><span class="modal-div-txt">OR WITH EMAIL</span><div class="modal-div-line"></div></div>
+      <form onsubmit="handleLogin(event)">
+        <div class="mfield">
+          <label>Email address</label>
+          <div class="mfield-wrap">
+            <span class="mfield-icon">✉</span>
+            <input type="email" id="login-email" placeholder="you@university.edu" required>
+          </div>
+        </div>
+        <div class="mfield">
+          <label>Password</label>
+          <div class="mfield-wrap">
+            <span class="mfield-icon">🔒</span>
+            <input type="password" id="login-pass" placeholder="Your password" required>
+            <span class="mfield-eye" onclick="togglePw('login-pass',this)">👁</span>
+          </div>
+        </div>
+        <div class="modal-row">
+          <label class="modal-remember"><input type="checkbox" checked> Remember me</label>
+          <button type="button" class="modal-forgot" onclick="switchTab('forgot')">Forgot password?</button>
+        </div>
+        <button type="submit" class="btn-modal-submit">Sign In →</button>
+      </form>
+      <div class="modal-secure">🔒 256-bit SSL · Your data is always safe</div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="mpage" id="mpage-register">
+      <div class="modal-title">Join <span class="grad">50,000+ students</span></div>
+      <div class="modal-sub">Already have an account? <a onclick="switchTab('login')">Sign in →</a></div>
+      <div class="modal-oauth">
+        <button class="modal-oauth-btn"><svg width="14" height="14" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.5c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.6 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.2-8 2.2-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.8 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.7c-.5-1.4-.7-2.9-.7-4.7s.2-3.3.7-4.7v-6.2H2.7C1 16.5 0 20.1 0 24s1 7.5 2.7 10.9l8.1-6.2z"/><path fill="#EA4335" d="M24 9.5c3.4 0 6.5 1.2 8.9 3.5l6.6-6.6C35.9 2.5 30.4 0 24 0 14.8 0 6.7 5.2 2.7 13.1l8.1 6.2c1.9-5.5 7.1-9.6 13.1-9.6z"/></svg>Google</button>
+        <button class="modal-oauth-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</button>
+      </div>
+      <div class="modal-divider"><div class="modal-div-line"></div><span class="modal-div-txt">OR WITH EMAIL</span><div class="modal-div-line"></div></div>
+      <form onsubmit="handleRegister(event)">
+        <div class="mfield no-icon"><label>Full name</label><input type="text" id="reg-name" placeholder="Your full name" required></div>
+        <div class="mfield">
+          <label>Email</label>
+          <div class="mfield-wrap"><span class="mfield-icon">✉</span><input type="email" id="reg-email" placeholder="you@university.edu" required></div>
+        </div>
+        <div class="mfield">
+          <label>Password</label>
+          <div class="mfield-wrap"><span class="mfield-icon">🔒</span><input type="password" id="reg-pass" placeholder="Create a strong password" required><span class="mfield-eye" onclick="togglePw('reg-pass',this)">👁</span></div>
+        </div>
+        <button type="submit" class="btn-modal-submit">Create Account →</button>
+      </form>
+      <div class="modal-secure">🔒 256-bit SSL · GDPR compliant · No spam, ever</div>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="mpage" id="mpage-forgot">
+      <div class="step-indicator">
+        <div class="stind done" id="fi1">✓</div><div class="stind-line done" id="fl1"></div>
+        <div class="stind active" id="fi2">2</div><div class="stind-line" id="fl2"></div>
+        <div class="stind pending" id="fi3">3</div>
+      </div>
+      <div id="fstep1">
+        <div class="modal-title">Forgot your <span class="grad">password?</span></div>
+        <div class="modal-sub" style="margin-bottom:20px">Enter your email and we'll send a verification code.</div>
+        <div class="mfield"><label>Email address</label><div class="mfield-wrap"><span class="mfield-icon">✉</span><input type="email" id="forgot-email" placeholder="you@university.edu"></div></div>
+        <button class="btn-modal-submit" onclick="forgotStep(2)">Send Code →</button>
+        <button type="button" style="background:none;color:var(--purple2);font-size:13px;width:100%;text-align:center;margin-top:8px;" onclick="switchTab('login')">← Back to Sign In</button>
+      </div>
+      <div id="fstep2" style="display:none">
+        <div class="modal-title">Check your <span class="grad">email</span></div>
+        <div class="modal-sub">We sent a 6-digit code to your email.</div>
+        <div class="otp-row"><input type="text" maxlength="1" oninput="otpNext(this,0)"><input type="text" maxlength="1" oninput="otpNext(this,1)"><input type="text" maxlength="1" oninput="otpNext(this,2)"><input type="text" maxlength="1" oninput="otpNext(this,3)"><input type="text" maxlength="1" oninput="otpNext(this,4)"><input type="text" maxlength="1" oninput="otpNext(this,5)"></div>
+        <div class="otp-resend">Didn't receive it? <a onclick="void(0)">Resend code</a></div>
+        <button class="btn-modal-submit" onclick="forgotStep(3)">Verify →</button>
+      </div>
+      <div id="fstep3" style="display:none">
+        <div class="modal-title">Create new <span class="grad">password</span></div>
+        <div class="modal-sub" style="margin-bottom:16px">Choose a strong password.</div>
+        <div class="mfield"><label>New password</label><div class="mfield-wrap"><span class="mfield-icon">🔒</span><input type="password" placeholder="New password"><span class="mfield-eye">👁</span></div></div>
+        <div class="mfield"><label>Confirm password</label><div class="mfield-wrap"><span class="mfield-icon">🔒</span><input type="password" placeholder="Repeat password"><span class="mfield-eye">👁</span></div></div>
+        <button class="btn-modal-submit" onclick="handlePasswordReset()">Reset Password →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="home.js"></script>
+</body>
+</html>

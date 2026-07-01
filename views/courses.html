@@ -1,0 +1,19 @@
+      <div class="courses-header">
+        <div>
+          <div class="courses-title">My Courses</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:4px;" id="coursesCount">No courses yet — add your first one!</div>
+        </div>
+        <button class="btn-add-course" onclick="openAddCourse()">
+          ➕ Add Course
+        </button>
+      </div>
+
+      <div class="courses-grid" id="coursesGrid">
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📚</div>
+          <div class="empty-title">No courses yet</div>
+          <div class="empty-sub">Add your first course and start building your study schedule with AI.</div>
+          <button class="btn-empty" onclick="openAddCourse()">➕ Add Your First Course</button>
+        </div>
+      </div>

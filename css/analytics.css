@@ -1,0 +1,19 @@
+/* ═══ ANALYTICS PAGE ═══ */
+.analytics-grid{
+  display:grid;grid-template-columns:2fr 1fr;
+  gap:20px;margin-bottom:20px;
+}
+.heatmap-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:4px;
+}
+.heatmap-cell{
+  aspect-ratio:1;border-radius:4px;
+  background:var(--input-bg);
+  transition:background 0.2s;cursor:pointer;
+}
+.heatmap-cell.l1{background:rgba(124,58,237,0.25);}
+.heatmap-cell.l2{background:rgba(124,58,237,0.45);}
+.heatmap-cell.l3{background:rgba(124,58,237,0.65);}
+.heatmap-cell.l4{background:linear-gradient(135deg,var(--purple),var(--cyan));}
+.heatmap-cell:hover{transform:scale(1.2);}
