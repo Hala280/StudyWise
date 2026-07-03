@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink-900 dark:bg-ink-900 dark:text-paper font-body antialiased transition-colors duration-200;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+
+  /* Visible keyboard focus everywhere — accessibility floor */
+  :focus-visible {
+    @apply outline-none ring-2 ring-amber ring-offset-2 ring-offset-paper dark:ring-offset-ink-900;
+  }
+}
+
+@layer components {
+  /* Signature element: animated underline used on headings/nav links */
+  .progress-underline {
+    @apply relative inline-block;
+  }
+  .progress-underline::after {
+    content: '';
+    @apply absolute left-0 -bottom-1 h-[3px] w-full bg-amber origin-left scale-x-0 transition-transform duration-500 ease-out;
+  }
+  .progress-underline:hover::after,
+  .progress-underline.is-active::after {
+    @apply scale-x-100;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
