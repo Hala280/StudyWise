@@ -1,0 +1,285 @@
+
+<nav class="navbar" id="navbar">
+<div class="nav-logo">
+<div class="nav-logo-icon">📚</div>
+<span class="nav-logo-name">StudyWise</span>
+</div>
+<div class="nav-links">
+<a class="nav-link" routerLink="/">Home</a>
+<div class="nav-dropdown">
+<a class="nav-link" href="#" style="cursor: pointer;">Features <span>▼</span></a>
+<div class="mega-menu">
+<a class="mega-card" href="#">
+<div class="mega-icon">📅</div>
+<div class="mega-text"><h4>Smart Scheduler</h4><p>Constraint-Based Algorithm</p></div>
+</a>
+<a class="mega-card" href="#">
+<div class="mega-icon">🔄</div>
+<div class="mega-text"><h4>Adaptive Logic</h4><p>Auto-Rescheduling Engine</p></div>
+</a>
+<a class="mega-card" href="#">
+<div class="mega-icon">📊</div>
+<div class="mega-text"><h4>Progress Analytics</h4><p>Study Velocity &amp; Heatmaps</p></div>
+</a>
+</div>
+</div>
+<a class="nav-link" routerLink="/ai-syllabus-parser">AI Parser</a>
+<a class="nav-link active" routerLink="/about">About</a>
+</div>
+<div class="nav-right">
+<!-- Auth Buttons -->
+<div class="auth-group" id="btn-open-auth">
+<button class="btn-nav-login" onclick="openModal('login')">Log In</button>
+<button class="btn-nav-register" onclick="openModal('register')">Register Free</button>
+</div>
+<!-- Profile Dropdown (Shows when logged in) -->
+<div id="profile-area" style="display:none; position:relative;">
+<button class="profile-btn" id="profileBtn">
+<div class="profile-avatar" id="profileAvatar">S</div>
+<span id="profileName">Student</span>
+<span class="profile-chevron">▼</span>
+</button>
+<div class="profile-dropdown" id="profileDropdown">
+<div class="dropdown-header">
+<div class="dropdown-name" id="dropdownName">Name</div>
+<div class="dropdown-email" id="dropdownEmail">email@edu.com</div>
+</div>
+<div class="theme-toggle-row">
+<span class="theme-toggle-label"><span>🌙</span> Dark Mode</span>
+<div class="toggle-switch on" id="themeToggle" onclick="toggleTheme()">
+<div class="toggle-knob"></div>
+</div>
+</div>
+<button class="dropdown-item" onclick="logout()" style="margin-top:8px;"><span>🚪</span> Sign Out</button>
+</div>
+</div>
+<!-- Theme Toggle (Shows when NOT logged in) -->
+<div id="nav-theme-btn" style="display:flex;align-items:center;">
+<div class="toggle-switch on" id="themeToggleNav" onclick="toggleTheme()" style="margin-left:8px;">
+<div class="toggle-knob"></div>
+</div>
+</div>
+</div>
+</nav>
+<!-- -->
+<section class="about-hero">
+<div class="about-hero-bg"></div>
+<div class="about-hero-overlay"></div>
+<div class="section-inner" style="text-align: center;">
+<div class="section-tag" style="animation: fadeUp 0.8s ease-out;">✦ Who We Are</div>
+<h1 class="about-title">Revolutionizing <span class="grad">Student Productivity</span></h1>
+<p class="about-sub">StudyWise isn't just another to-do list. We bridge the gap between heavy academic workloads and the limited hours in a student's day using state-of-the-art AI algorithms.</p>
+</div>
+</section>
+<section class="section pt-0">
+<div class="section-inner">
+<div class="mission-grid">
+<div class="mv-card">
+<div class="mv-icon">🎯</div>
+<h3 class="mv-title">Our Mission</h3>
+<p class="mv-text">To democratize access to smart educational tools. We want to eliminate study burnout by providing students with an intelligent engine that organizes their academic life automatically, letting them focus solely on learning.</p>
+</div>
+<div class="mv-card">
+<div class="mv-icon">👁️</div>
+<h3 class="mv-title">Our Vision</h3>
+<p class="mv-text">To become the global standard for academic time management. We envision a future where no student fails a class or misses a deadline simply because of poor planning or overwhelming schedules.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- -->
+<section class="section" style="background: var(--bg2);">
+<div class="section-inner">
+<div style="text-align:center; margin-bottom: 60px;">
+<div class="section-tag">✦ Core Engine</div>
+<h2 class="section-title">The Anatomy of <span class="grad">StudyWise</span></h2>
+<p class="section-sub" style="margin: 0 auto;">Discover exactly how every feature is engineered to guarantee your academic success.</p>
+</div>
+<div class="feature-timeline">
+<!-- Feature 1 -->
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-content">
+<span class="t-tag">Step 1: Data Extraction</span>
+<h3 class="t-title">AI Syllabus Parser</h3>
+<p class="t-desc">Forget manual data entry. Upload your PDF syllabus, and our Azure-backed AI instantly extracts critical dates, assignment weights, and lecture topics.</p>
+<ul class="t-list">
+<li>Extracts reading materials and deadlines</li>
+<li>Identifies exam dates automatically</li>
+<li>Creates structured DB records in seconds</li>
+</ul>
+</div>
+<div class="timeline-img">
+<!-- صورة تعبر عن الذكاء الاصطناعي وقراءة البيانات -->
+<img alt="AI parsing documents" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&amp;fit=crop&amp;w=800&amp;q=80"/>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-content">
+<span class="t-tag">Step 2: Processing</span>
+<h3 class="t-title">Constraint-Based Scheduler</h3>
+<p class="t-desc">Our C# Interval Scheduling Algorithm acts as your personal manager. You input when you are busy (classes, work), and the engine finds the optimal gaps for studying.</p>
+<ul class="t-list">
+<li>Prevents scheduling conflicts automatically</li>
+<li>Balances heavy and light subjects</li>
+<li>Respects your personal "off" hours</li>
+</ul>
+</div>
+<div class="timeline-img">
+<!-- صورة تعبر عن التقويم والجدولة والتخطيط -->
+<img alt="Calendar scheduling logic" src="https://images.unsplash.com/photo-1611224885990-ab7363d1f2a9?auto=format&amp;fit=crop&amp;w=800&amp;q=80"/>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-content">
+<span class="t-tag">Step 3: Real-time Adaptation</span>
+<h3 class="t-title">Adaptive "Life Happens" Logic</h3>
+<p class="t-desc">Missed a day? Got sick? No problem. The system dynamically shifts your remaining workload across future available slots without overlapping existing tasks.</p>
+<ul class="t-list">
+<li>Real-time background recalculation</li>
+<li>No guilt-tripping for missed tasks</li>
+<li>Maintains long-term exam readiness</li>
+</ul>
+</div>
+<div class="timeline-img">
+<!-- صورة تعبر عن التكنولوجيا المرنة وتغيير المسارات -->
+<img alt="Data analytics adjusting" src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&amp;fit=crop&amp;w=800&amp;q=80"/>
+</div>
+</div>
+<!-- Feature 4 -->
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<div class="timeline-content">
+<span class="t-tag">Step 4: Insights</span>
+<h3 class="t-title">Progress Analytics</h3>
+<p class="t-desc">Visualize your academic health. Our complex LINQ queries feed beautiful dashboards showing you exactly where you stand, preventing burnout through gamification.</p>
+<ul class="t-list">
+<li>Study velocity tracking</li>
+<li>Subject heatmaps to spot weaknesses</li>
+<li>Streak counters to build consistency</li>
+</ul>
+</div>
+<div class="timeline-img">
+<!-- صورة تعبر عن لوحة تحليلات ورسومات بيانية -->
+<img alt="Analytics Dashboard" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&amp;fit=crop&amp;w=800&amp;q=80"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer">
+<div class="footer-inner">
+<div class="footer-top">
+<div class="footer-brand">
+<div class="nav-logo" style="margin-bottom:0">
+<div class="nav-logo-icon">📚</div>
+<span class="nav-logo-name">StudyWise</span>
+</div>
+<p>AI-powered learning companion helping students worldwide achieve their academic goals through smart planning and personalized study.</p>
+</div>
+<div class="footer-col">
+<h4>Product</h4>
+<a href="#">Features</a><a href="#">AI Tutor</a><a href="#">Study Groups</a><a href="#">Mobile App</a>
+</div>
+<div class="footer-col">
+<h4>Resources</h4>
+<a href="#">Study Tips Blog</a><a href="#">Help Center</a><a href="#">API Docs</a><a href="#">Community</a>
+</div>
+<div class="footer-col">
+<h4>Company</h4>
+<a href="#">About Us</a><a href="#">Careers</a><a href="#">Privacy</a><a href="#">Terms</a>
+</div>
+</div>
+<div class="footer-bottom">
+<span class="footer-copy">© 2025 StudyWise. All rights reserved.</span>
+<span class="footer-quote" id="footerQuote"></span>
+</div>
+</div>
+</footer>
+<!-- -->
+<footer class="footer">
+<div class="footer-inner">
+<div class="nav-logo" style="justify-content: center; margin-bottom: 20px;">
+<div class="nav-logo-icon">📚</div>
+<span class="nav-logo-name">StudyWise</span>
+</div>
+<span class="footer-copy">© 2026 StudyWise AI. Designed to perfection.</span>
+</div>
+</footer>
+<div class="chat-wrap">
+<div class="chat-panel" id="chatPanel">
+<div class="chat-header">
+<div class="chat-header-left">
+<div class="chat-avatar">🤖</div>
+<div>
+<div class="chat-header-name">StudyWise AI Tutor</div>
+<div class="chat-header-status">● Online</div>
+</div>
+</div>
+<button class="chat-close" onclick="toggleChat()">✕</button>
+</div>
+<div class="chat-messages" id="chatMessages">
+<div class="chat-msg bot">Hi! Have questions about how StudyWise works? Ask me anything!</div>
+</div>
+<div class="chat-input-row">
+<input class="chat-input" id="chatInput" onkeydown="if(event.key==='Enter') sendChat()" placeholder="Type a message..."/>
+<button class="chat-send" onclick="sendChat()">➤</button>
+</div>
+</div>
+<div class="chat-btn" onclick="toggleChat()">🤖</div>
+</div>
+<!-- -->
+<div class="modal-overlay" id="authModal">
+<div class="modal-box">
+<button class="modal-close" onclick="closeModal()">✕</button>
+<div class="modal-tabs">
+<button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+<button class="modal-tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+</div>
+<div class="mpage active" id="mpage-login">
+<div class="modal-title">Welcome Back</div>
+<form onsubmit="handleLogin(event)">
+<div class="mfield">
+<label>Email</label>
+<div class="mfield-wrap">
+<span class="mfield-icon">✉</span>
+<input id="login-email" placeholder="you@edu.com" required="" type="email"/>
+</div>
+</div>
+<div class="mfield">
+<label>Password</label>
+<div class="mfield-wrap">
+<span class="mfield-icon">🔒</span>
+<input required="" type="password"/>
+</div>
+</div>
+<button class="btn-modal-submit" type="submit">Sign In</button>
+</form>
+</div>
+<div class="mpage" id="mpage-register">
+<div class="modal-title">Join StudyWise</div>
+<form onsubmit="handleRegister(event)">
+<div class="mfield">
+<label>Name</label>
+<div class="mfield-wrap"><span class="mfield-icon">👤</span><input id="reg-name" required="" type="text"/></div>
+</div>
+<div class="mfield">
+<label>Email</label>
+<div class="mfield-wrap"><span class="mfield-icon">✉</span><input id="reg-email" required="" type="email"/></div>
+</div>
+<div class="mfield">
+<label>Password</label>
+<div class="mfield-wrap"><span class="mfield-icon">🔒</span><input required="" type="password"/></div>
+</div>
+<button class="btn-modal-submit" type="submit">Register</button>
+</form>
+</div>
+</div>
+</div>
+<!-- -->
+
