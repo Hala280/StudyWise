@@ -1,0 +1,145 @@
+
+<!-- ════════════════ NAVBAR ════════════════ -->
+<nav class="navbar" id="navbar">
+<div class="nav-logo">
+<div class="nav-logo-icon">📚</div>
+<span class="nav-logo-name">StudyWise</span>
+</div>
+<div class="nav-links">
+<a class="nav-link" routerLink="/">Home</a>
+<!-- Mega Menu Dropdown -->
+<div class="nav-dropdown">
+<button class="nav-link" style="cursor: pointer;">Features <span style="font-size:9px; margin-left:4px; vertical-align:middle;">▼</span></button>
+<div class="mega-menu">
+<a class="mega-card" href="#">
+<div class="mega-icon">📅</div>
+<div class="mega-text">
+<h4>Smart Scheduler</h4>
+<p>Constraint-Based Algorithm</p>
+</div>
+</a>
+<a class="mega-card" href="#">
+<div class="mega-icon">🔄</div>
+<div class="mega-text">
+<h4>Adaptive Logic</h4>
+<p>Auto-Rescheduling Engine</p>
+</div>
+</a>
+<a class="mega-card" href="#">
+<div class="mega-icon">📊</div>
+<div class="mega-text">
+<h4>Progress Analytics</h4>
+<p>Study Velocity &amp; Heatmaps</p>
+</div>
+</a>
+</div>
+</div>
+<!-- تم إضافة class active هنا ليتعلم الخط تحتها -->
+<a class="nav-link active" routerLink="/ai-syllabus-parser">AI Parser</a>
+<a class="nav-link" routerLink="/about">About</a>
+</div>
+<div class="nav-right">
+<!-- Shown when NOT logged in -->
+<div class="auth-group" id="btn-open-auth">
+<button class="btn-nav-login" onclick="openModal('login')">Log In</button>
+<button class="btn-nav-register" onclick="openModal('register')">Register Free</button>
+</div>
+<!-- Shown when logged in -->
+<div id="profile-area" style="display:none; position:relative;">
+<button class="profile-btn" id="profileBtn">
+<div class="profile-avatar" id="profileAvatar">S</div>
+<span id="profileName">Student</span>
+<span class="profile-chevron">▼</span>
+</button>
+</div>
+<!-- Theme toggle -->
+<div id="nav-theme-btn" style="display:flex;align-items:center;">
+<div class="toggle-switch on" id="themeToggleNav" onclick="toggleTheme()" style="margin-left:8px;">
+<div class="toggle-knob"></div>
+</div>
+</div>
+</div>
+</nav>
+<!-- ════════════════ PAGE HEADER ════════════════ -->
+<main class="page-header">
+<h1 class="page-title">AI Parser</h1>
+<p class="page-sub">Upload your course syllabus (PDF or Image). Our Intelligent System will extract dates, assignments, and workload instantly to feed the scheduling engine.</p>
+</main>
+<!-- ════════════════ UPLOAD SECTION ════════════════ -->
+<div class="parser-main">
+<div class="upload-area" id="dropZone">
+<i class="fas fa-file-pdf upload-icon"></i>
+<h3>Drag &amp; Drop your Syllabus Document</h3>
+<p style="color: var(--text3); font-size: 13px; margin-top: 8px;">Supports .PDF, .PNG, .JPG (Max 10MB)</p>
+<input hidden="" id="fileInput" type="file"/>
+<div class="processing-msg" id="processingMsg">
+<i class="fas fa-circle-notch fa-spin"></i> Reading Document via AI...
+        </div>
+</div>
+<!-- Results Section (Hidden initially) -->
+<div class="results-section" id="results">
+<div class="data-table">
+<h3>Review &amp; Confirm</h3>
+<ul class="task-list">
+<li class="task-item">
+<i class="fas fa-check-circle task-icon"></i>
+<span>Midterm Project Submission</span>
+<span class="task-date">May 20</span>
+</li>
+<li class="task-item">
+<i class="fas fa-check-circle task-icon"></i>
+<span>Software Testing Quiz</span>
+<span class="task-date">May 25</span>
+</li>
+<li class="task-item">
+<i class="fas fa-check-circle task-icon"></i>
+<span>Final Presentation</span>
+<span class="task-date">June 10</span>
+</li>
+</ul>
+<button class="btn-confirm" (click)="goToDashboard()">Confirm &amp; Save to DB</button>
+</div>
+<div class="data-table">
+<h3 style="margin-bottom:0">Document Preview</h3>
+<div style="height: 250px; background: rgba(0,0,0,0.3); border-radius: 12px; display:flex; align-items:center; justify-content:center; margin-top: 15px; border: 1px dashed var(--border);">
+<p style="color: var(--text3); font-size: 13px;"><i class="fas fa-file-alt"></i> Preview will appear here</p>
+</div>
+</div>
+</div>
+</div>
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer">
+<div class="footer-inner">
+<div class="footer-top">
+<div class="footer-brand">
+<div class="nav-logo" style="margin-bottom:0">
+<div class="nav-logo-icon">📚</div>
+<span class="nav-logo-name">StudyWise</span>
+</div>
+<p>AI-powered learning companion helping students worldwide achieve their academic goals through smart planning and personalized study.</p>
+</div>
+<div class="footer-col">
+<h4>Product</h4>
+<a href="#">Features</a><a href="#">AI Tutor</a><a href="#">Study Groups</a><a href="#">Mobile App</a>
+</div>
+<div class="footer-col">
+<h4>Resources</h4>
+<a href="#">Study Tips Blog</a><a href="#">Help Center</a><a href="#">API Docs</a><a href="#">Community</a>
+</div>
+<div class="footer-col">
+<h4>Company</h4>
+<a href="#">About Us</a><a href="#">Careers</a><a href="#">Privacy</a><a href="#">Terms</a>
+</div>
+</div>
+<div class="footer-bottom">
+<span class="footer-copy">© 2026 StudyWise. All rights reserved.</span>
+<span class="footer-quote" id="footerQuote">"The secret of getting ahead is getting started." — Mark Twain</span>
+</div>
+</div>
+</footer>
+<!-- ════════════════ CHAT ASSISTANT ════════════════ -->
+<div class="chat-wrap">
+<button class="chat-btn" onclick="alert('AI Tutor is Ready!')">🤖</button>
+</div>
+<!-- ════════════════ SCRIPTS ════════════════ -->
+

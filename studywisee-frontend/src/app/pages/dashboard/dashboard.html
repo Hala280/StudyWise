@@ -1,0 +1,552 @@
+
+<!-- ═══ SIDEBAR OVERLAY ═══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-logo">
+<div class="sidebar-logo-icon">📚</div>
+<span class="sidebar-logo-name">StudyWise</span>
+<span class="sidebar-logo-ver">Beta</span>
+</div>
+<div class="sidebar-user">
+<div class="sidebar-avatar" id="sidebarAvatar">S</div>
+<div>
+<div class="sidebar-username" id="sidebarName">Student</div>
+<div class="sidebar-status"><div class="status-dot"></div>Active now</div>
+</div>
+</div>
+<nav class="sidebar-nav">
+<div class="nav-section-label">Main</div>
+<div class="nav-item active" onclick="showView('overview')">
+<span class="nav-icon">🏠</span> Overview
+    </div>
+<div class="nav-item" onclick="showView('courses')">
+<span class="nav-icon">📖</span> My Courses
+      <span class="nav-badge green" id="coursesBadge">0</span>
+</div>
+<div class="nav-item" onclick="showView('schedule')">
+<span class="nav-icon">📅</span> Schedule
+      <span class="nav-badge amber">Today</span>
+</div>
+<div class="nav-item" onclick="showView('analytics')">
+<span class="nav-icon">📊</span> Analytics
+    </div>
+<div class="nav-section-label">AI Tools</div>
+<div class="nav-item" onclick="showView('parser')">
+<span class="nav-icon">🤖</span> AI Syllabus Parser
+      <span class="nav-badge">New</span>
+</div>
+<div class="nav-item" onclick="showView('tutor')">
+<span class="nav-icon">💬</span> AI Tutor
+    </div>
+<div class="nav-section-label">Progress</div>
+<div class="nav-item" onclick="showView('goals')">
+<span class="nav-icon">🎯</span> Goals
+    </div>
+<div class="nav-item" onclick="showView('achievements')">
+<span class="nav-icon">🏆</span> Achievements
+    </div>
+</nav>
+<!-- Streak Widget -->
+<div class="sidebar-streak">
+<div class="streak-top">
+<span class="streak-fire">🔥</span>
+<div>
+<div class="streak-num">14</div>
+<div class="streak-label">Day Streak</div>
+</div>
+</div>
+<div class="streak-days" id="streakDays"></div>
+</div>
+<div class="sidebar-bottom">
+<div class="sidebar-bottom-item" onclick="toggleTheme()">
+<span>🌙</span> Toggle Theme
+    </div>
+<div class="sidebar-bottom-item" onclick="goHome()">
+<span>🏠</span> Back to Home
+    </div>
+<div class="sidebar-bottom-item" onclick="logout()">
+<span>🚪</span> Sign Out
+    </div>
+</div>
+</aside>
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+<!-- TOPBAR -->
+<header class="topbar">
+<div class="topbar-left">
+<button class="hamburger" onclick="openSidebar()">☰</button>
+<div>
+<div class="topbar-title" id="topbarTitle">Dashboard</div>
+<div class="breadcrumb">
+<span>StudyWise</span>
+<span class="sep">›</span>
+<span id="topbarBread">Overview</span>
+</div>
+</div>
+</div>
+<div class="topbar-right">
+<div class="topbar-search">
+<span>🔍</span>
+<input placeholder="Search courses, tasks…"/>
+</div>
+<div class="topbar-btn">
+        🔔<div class="notif-dot"></div>
+</div>
+<div class="theme-btn" onclick="toggleTheme()">🌙</div>
+</div>
+</header>
+<!-- PAGE CONTENT -->
+<div class="page-content">
+<!-- ════ Each view's markup is loaded from views/<name>.html at runtime ════ -->
+<div class="view active" id="view-overview">
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Good morning, <span id="welcomeName">Student</span>! ☀️</h2>
+          <p>You have <strong>3 study sessions</strong> scheduled today. Stay consistent and keep the streak alive!</p>
+        </div>
+        <div class="welcome-emoji">🎓</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card" style="--stat-bg:rgba(124,58,237,0.12);--stat-glow:rgba(124,58,237,0.12);">
+          <div class="stat-icon-box">📚</div>
+          <div class="stat-val" id="statCourses">0</div>
+          <div class="stat-label">Active Courses</div>
+          <div class="stat-change up">↑ Ready to study</div>
+        </div>
+        <div class="stat-card" style="--stat-bg:rgba(14,165,233,0.12);--stat-glow:rgba(14,165,233,0.12);">
+          <div class="stat-icon-box">⏱️</div>
+          <div class="stat-val">47.5h</div>
+          <div class="stat-label">Hours This Month</div>
+          <div class="stat-change up">↑ 12% vs last month</div>
+        </div>
+        <div class="stat-card" style="--stat-bg:rgba(245,158,11,0.12);--stat-glow:rgba(245,158,11,0.12);">
+          <div class="stat-icon-box">🔥</div>
+          <div class="stat-val">14</div>
+          <div class="stat-label">Day Streak</div>
+          <div class="stat-change up">↑ Personal best!</div>
+        </div>
+        <div class="stat-card" style="--stat-bg:rgba(16,185,129,0.12);--stat-glow:rgba(16,185,129,0.12);">
+          <div class="stat-icon-box">🏆</div>
+          <div class="stat-val">#23</div>
+          <div class="stat-label">Global Rank</div>
+          <div class="stat-change up">↑ Top 3% this week</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Subject Progress -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div>
+              <div class="dash-card-title">Subject Progress</div>
+              <div class="dash-card-sub">This semester overview</div>
+            </div>
+            <button class="card-action" onclick="showView('courses')">View All →</button>
+          </div>
+          <div class="subject-list" id="subjectList">
+            <!-- Populated by JS -->
+            <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;">
+              Add courses to see your progress here 📚
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div>
+              <div class="dash-card-title">Today's Schedule</div>
+              <div class="dash-card-sub" id="todayDate">Monday, June 29</div>
+            </div>
+            <button class="card-action">Full View →</button>
+          </div>
+          <div class="schedule-list">
+            <div class="schedule-item">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-line" style="background:linear-gradient(180deg,var(--purple),var(--cyan))"></div>
+              <div class="schedule-info">
+                <div class="schedule-title">Mathematics — Calculus</div>
+                <div class="schedule-meta">Chapter 5 · 90 min session</div>
+              </div>
+              <span class="schedule-badge badge-done">Done</span>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-time">13:00</div>
+              <div class="schedule-line" style="background:linear-gradient(180deg,var(--cyan),var(--cyan2))"></div>
+              <div class="schedule-info">
+                <div class="schedule-title">Physics — Waves</div>
+                <div class="schedule-meta">Chapter 8 · 60 min session</div>
+              </div>
+              <span class="schedule-badge badge-doing">Now</span>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-time">17:00</div>
+              <div class="schedule-line" style="background:linear-gradient(180deg,var(--pink),var(--purple2))"></div>
+              <div class="schedule-info">
+                <div class="schedule-title">English — Essay Review</div>
+                <div class="schedule-meta">Draft 2 · 45 min session</div>
+              </div>
+              <span class="schedule-badge badge-next">Next</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid-3">
+        <!-- AI Insights -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">🤖 AI Insights</div>
+          </div>
+          <div class="insight-card">
+            <span class="insight-icon">📈</span>
+            <div class="insight-text"><strong>Physics needs attention</strong> — you're 15% below your target pace. Add 2 extra sessions this week.</div>
+          </div>
+          <div class="insight-card">
+            <span class="insight-icon">🌟</span>
+            <div class="insight-text"><strong>English is your strength</strong> — 91% progress. Consider helping peers in the study group.</div>
+          </div>
+          <div class="insight-card">
+            <span class="insight-icon">⚡</span>
+            <div class="insight-text"><strong>Peak hours detected</strong> — you study best between 9 AM–12 PM. Schedule hard topics then.</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">⚡ Quick Actions</div>
+          </div>
+          <div class="quick-grid">
+            <div class="quick-btn" onclick="showView('parser')">
+              <span class="quick-btn-icon">📄</span>
+              <span class="quick-btn-label">Parse Syllabus</span>
+            </div>
+            <div class="quick-btn" onclick="showView('courses')">
+              <span class="quick-btn-icon">➕</span>
+              <span class="quick-btn-label">Add Course</span>
+            </div>
+            <div class="quick-btn" onclick="showView('tutor')">
+              <span class="quick-btn-icon">💬</span>
+              <span class="quick-btn-label">Ask AI Tutor</span>
+            </div>
+            <div class="quick-btn" onclick="showView('analytics')">
+              <span class="quick-btn-icon">📊</span>
+              <span class="quick-btn-label">View Progress</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Calendar -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">📅 Calendar</div>
+          </div>
+          <div class="mini-cal" id="miniCal"></div>
+        </div>
+      </div>
+
+</div>
+<div class="view" id="view-courses">
+      <div class="courses-header">
+        <div>
+          <div class="courses-title">My Courses</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:4px;" id="coursesCount">No courses yet — add your first one!</div>
+        </div>
+        <button class="btn-add-course" onclick="openAddCourse()">
+          ➕ Add Course
+        </button>
+      </div>
+
+      <div class="courses-grid" id="coursesGrid">
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📚</div>
+          <div class="empty-title">No courses yet</div>
+          <div class="empty-sub">Add your first course and start building your study schedule with AI.</div>
+          <button class="btn-empty" onclick="openAddCourse()">➕ Add Your First Course</button>
+        </div>
+      </div>
+
+</div>
+<div class="view" id="view-parser">
+      <div style="margin-bottom:24px;">
+        <div style="font-size:11px;color:var(--purple2);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">✦ AI Tool</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;">AI Syllabus Parser</div>
+        <div style="font-size:14px;color:var(--text3);">Upload your syllabus PDF or image — our AI will extract all topics, deadlines, and build your study plan automatically.</div>
+      </div>
+
+      <div class="parser-layout">
+        <div>
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="handleFileSelect(event)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Drop your syllabus here</div>
+            <div class="upload-sub">or click to browse your files</div>
+            <div class="upload-types">
+              <span class="type-tag">PDF</span>
+              <span class="type-tag">PNG</span>
+              <span class="type-tag">JPG</span>
+              <span class="type-tag">DOCX</span>
+            </div>
+          </div>
+
+          <div class="upload-preview" id="uploadPreview">
+            <span class="file-icon" id="previewIcon">📄</span>
+            <div class="file-info">
+              <div class="file-name" id="previewName">syllabus.pdf</div>
+              <div class="file-size" id="previewSize">2.4 MB</div>
+            </div>
+            <button class="file-remove" onclick="removeFile()">✕</button>
+          </div>
+
+          <button class="parse-btn" id="parseBtn" onclick="parseSyllabus()" disabled>
+            🤖 Parse with AI
+          </button>
+
+          <div style="margin-top:18px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;">How it works</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">1</div>
+                <div style="font-size:13px;color:var(--text2);padding-top:5px;">Upload your course syllabus (PDF, image, or Word doc)</div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">2</div>
+                <div style="font-size:13px;color:var(--text2);padding-top:5px;">AI extracts topics, deadlines, exams, and assignments</div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">3</div>
+                <div style="font-size:13px;color:var(--text2);padding-top:5px;">Review the results and add the course to your schedule with one click</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="parser-result">
+          <div class="result-header">
+            <div class="result-icon">✨</div>
+            <div>
+              <div class="result-title">Parsed Results</div>
+              <div class="result-sub">AI-extracted course information</div>
+            </div>
+          </div>
+
+          <div class="result-placeholder" id="resultPlaceholder">
+            <div class="result-placeholder-icon">🤖</div>
+            <div class="result-placeholder-text">Upload a syllabus to see<br>extracted information here</div>
+          </div>
+
+          <div class="parsing-loader" id="parsingLoader">
+            <div class="loader-ring"></div>
+            <div class="loader-text">Analyzing your syllabus…</div>
+            <div class="loader-sub">Extracting topics, deadlines & key dates</div>
+          </div>
+
+          <div class="result-content" id="resultContent">
+            <div class="parsed-course-name" id="parsedCourseName">Advanced Mathematics</div>
+            <div class="parsed-course-info" id="parsedCourseInfo">
+              <span class="info-chip">📅 16 Weeks</span>
+              <span class="info-chip">📝 6 Topics</span>
+              <span class="info-chip">⚠️ 4 Deadlines</span>
+              <span class="info-chip">🎓 3 Credit Hours</span>
+            </div>
+
+            <div class="topics-list">
+              <div class="topics-title">📚 Course Topics</div>
+              <div id="parsedTopics"></div>
+            </div>
+
+            <div class="deadlines-list">
+              <div class="topics-title">⏰ Deadlines & Exams</div>
+              <div id="parsedDeadlines"></div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn-result btn-result-primary" onclick="addParsedCourse()">
+                ✅ Add to My Courses
+              </button>
+              <button class="btn-result btn-result-outline" onclick="resetParser()">
+                🔄 Parse Another
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+</div>
+<div class="view" id="view-analytics">
+      <div style="margin-bottom:24px;">
+        <div style="font-size:11px;color:var(--purple2);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">✦ Insights</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);">Progress Analytics</div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">Study Hours — Last 4 Weeks</div>
+          </div>
+          <canvas id="hoursChart" height="200"></canvas>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">Subject Distribution</div>
+          </div>
+          <canvas id="pieChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="dash-card" style="margin-bottom:20px;">
+        <div class="dash-card-header">
+          <div class="dash-card-title">Study Heatmap — This Month</div>
+          <button class="card-action">Export →</button>
+        </div>
+        <div class="heatmap-grid" id="heatmapGrid"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:12px;">
+          <span style="font-size:11px;color:var(--text3);">Less</span>
+          <div style="width:14px;height:14px;border-radius:3px;background:var(--input-bg);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.25);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.45);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.65);"></div>
+          <div style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,var(--purple),var(--cyan));"></div>
+          <span style="font-size:11px;color:var(--text3);">More</span>
+        </div>
+      </div>
+
+</div>
+<div class="view" id="view-schedule">
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:24px;">📅 Weekly Schedule</div>
+      <div class="dash-card">
+        <div style="text-align:center;padding:40px;color:var(--text3);">
+          <div style="font-size:36px;margin-bottom:12px;">🚧</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Schedule Builder</div>
+          <div style="font-size:13px;">Connect your .NET backend to generate AI-powered schedules based on your courses and deadlines.</div>
+        </div>
+      </div>
+
+</div>
+<div class="view" id="view-tutor">
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:24px;">💬 AI Tutor</div>
+      <div class="dash-card" style="max-width:700px;">
+        <div style="display:flex;flex-direction:column;height:500px;">
+          <div style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:10px;" id="tutorMessages">
+            <div style="background:var(--input-bg);border:1px solid var(--input-bdr);border-radius:14px;padding:12px 16px;font-size:13px;color:var(--text);max-width:80%;border-bottom-left-radius:4px;">
+              👋 Hi! I'm your AI Study Tutor. Ask me to explain any concept, generate practice questions, or summarize a topic!
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding:14px;display:flex;gap:10px;">
+            <input class="form-input" id="tutorInput" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendTutorMsg()" style="flex:1;">
+            <button onclick="sendTutorMsg()" style="padding:10px 18px;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Send</button>
+          </div>
+        </div>
+      </div>
+
+</div>
+<div class="view" id="view-goals">
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:24px;">🎯 Goals</div>
+      <div class="dash-card"><div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Goals feature — connect to backend to set exam targets and GPA goals.</div></div>
+
+</div>
+<div class="view" id="view-achievements">
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:24px;">🏆 Achievements</div>
+      <div class="dash-grid-3">
+        <div class="dash-card" style="text-align:center;">
+          <div style="font-size:42px;margin-bottom:10px;">🔥</div>
+          <div style="font-weight:700;color:var(--text);">14-Day Streak</div>
+          <div style="font-size:12px;color:var(--green);margin-top:4px;">Unlocked!</div>
+        </div>
+        <div class="dash-card" style="text-align:center;">
+          <div style="font-size:42px;margin-bottom:10px;opacity:0.3;">🎯</div>
+          <div style="font-weight:700;color:var(--text2);">Goal Crusher</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px;">Complete 5 goals</div>
+        </div>
+        <div class="dash-card" style="text-align:center;">
+          <div style="font-size:42px;margin-bottom:10px;opacity:0.3;">📚</div>
+          <div style="font-weight:700;color:var(--text2);">Course Master</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px;">Add 5 courses</div>
+        </div>
+      </div>
+
+</div>
+</div><!-- end page-content -->
+</div><!-- end main -->
+<!-- ═══ ADD COURSE MODAL (shared shell element, used by the Courses page) ═══ -->
+<div class="modal-overlay" id="addCourseModal">
+<div class="modal-box">
+<button class="modal-close" onclick="closeAddCourse()">✕</button>
+<div class="modal-title">Add New Course</div>
+<div class="modal-sub">Set up your course to generate a smart study plan</div>
+<div class="form-group">
+<label class="form-label">Course Name *</label>
+<input class="form-input" id="cName" placeholder="e.g. Advanced Mathematics"/>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">Course Code</label>
+<input class="form-input" id="cCode" placeholder="e.g. MATH301"/>
+</div>
+<div class="form-group">
+<label class="form-label">Credit Hours</label>
+<input class="form-input" id="cCredits" max="6" min="1" placeholder="3" type="number"/>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">Start Date</label>
+<input class="form-input" id="cStart" type="date"/>
+</div>
+<div class="form-group">
+<label class="form-label">Exam Date</label>
+<input class="form-input" id="cExam" type="date"/>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Difficulty</label>
+<select class="form-select" id="cDiff">
+<option value="easy">Easy</option>
+<option selected="" value="medium">Medium</option>
+<option value="hard">Hard</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Course Icon</label>
+<div class="emoji-picker-row" id="emojiPicker">
+<div class="emoji-opt selected" data-emoji="📐" onclick="selectEmoji(this)">📐</div>
+<div class="emoji-opt" data-emoji="🔬" onclick="selectEmoji(this)">🔬</div>
+<div class="emoji-opt" data-emoji="💻" onclick="selectEmoji(this)">💻</div>
+<div class="emoji-opt" data-emoji="📖" onclick="selectEmoji(this)">📖</div>
+<div class="emoji-opt" data-emoji="🧮" onclick="selectEmoji(this)">🧮</div>
+<div class="emoji-opt" data-emoji="🌍" onclick="selectEmoji(this)">🌍</div>
+<div class="emoji-opt" data-emoji="⚗️" onclick="selectEmoji(this)">⚗️</div>
+<div class="emoji-opt" data-emoji="🎨" onclick="selectEmoji(this)">🎨</div>
+<div class="emoji-opt" data-emoji="🏛️" onclick="selectEmoji(this)">🏛️</div>
+<div class="emoji-opt" data-emoji="💊" onclick="selectEmoji(this)">💊</div>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Color Theme</label>
+<div class="color-picker-row" id="colorPicker">
+<div class="color-swatch selected" data-color="#7c3aed" onclick="selectColor(this)" style="background:#7c3aed"></div>
+<div class="color-swatch" data-color="#0ea5e9" onclick="selectColor(this)" style="background:#0ea5e9"></div>
+<div class="color-swatch" data-color="#ec4899" onclick="selectColor(this)" style="background:#ec4899"></div>
+<div class="color-swatch" data-color="#10b981" onclick="selectColor(this)" style="background:#10b981"></div>
+<div class="color-swatch" data-color="#f59e0b" onclick="selectColor(this)" style="background:#f59e0b"></div>
+<div class="color-swatch" data-color="#ef4444" onclick="selectColor(this)" style="background:#ef4444"></div>
+<div class="color-swatch" data-color="#8b5cf6" onclick="selectColor(this)" style="background:#8b5cf6"></div>
+</div>
+</div>
+<button class="btn-submit" onclick="saveCourse()">✅ Add Course to Schedule</button>
+</div>
+</div>
+<!-- TOAST -->
+<div class="sw-toast" id="swToast"></div>
+<!-- ═══ JS: one file per page/tab, plus shared/common.js last (it bootstraps everything) ═══ -->
+
+
+
+
+
+
