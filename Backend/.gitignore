@@ -1,0 +1,35 @@
+# Build artifacts
+bin/
+obj/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.swp
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Publish output
+publish/
+wwwroot/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local test and coverage output
+TestResults/
+coverage/
+
+# EF Core / local tooling caches
+Migrations/*ModelSnapshot.cs.bak
+
+# Secrets and local configuration
+secrets.json

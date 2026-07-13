@@ -1,16 +1,15 @@
-// Card.js
-// Usage: import { createCard } from './components/Card.js';
+// Card.ts
+// Usage: import { createCard } from './components/Card';
 //        container.appendChild(createCard({ title: 'Biology 101', body: '12 flashcards due', progress: 40 }));
 
-/**
- * @param {Object} opts
- * @param {string} opts.title
- * @param {string} [opts.body]
- * @param {number} [opts.progress] - 0-100, renders a progress bar if provided
- * @param {string} [opts.eyebrow] - small label above title (e.g. category)
- * @returns {HTMLDivElement}
- */
-export function createCard({ title, body, progress, eyebrow }) {
+export interface CardOptions {
+  title: string;
+  body?: string;
+  progress?: number;
+  eyebrow?: string;
+}
+
+export function createCard({ title, body, progress, eyebrow }: CardOptions): HTMLDivElement {
   const card = document.createElement('div');
   card.className =
     'rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6 shadow-sm hover:shadow-md transition-shadow duration-200';

@@ -1,19 +1,18 @@
-// Input.js
-// Usage: import { createInput } from './components/Input.js';
+// Input.ts
+// Usage: import { createInput } from './components/Input';
 //        container.appendChild(createInput({ label: 'Email', type: 'email', placeholder: 'you@studywise.com' }));
 
 let idCounter = 0;
 
-/**
- * @param {Object} opts
- * @param {string} opts.label
- * @param {string} [opts.type]
- * @param {string} [opts.placeholder]
- * @param {string} [opts.helpText]
- * @param {string} [opts.errorText] - if set, renders input in error state
- * @returns {HTMLDivElement}
- */
-export function createInput({ label, type = 'text', placeholder = '', helpText, errorText }) {
+interface InputOptions {
+  label: string;
+  type?: HTMLInputElement['type'];
+  placeholder?: string;
+  helpText?: string;
+  errorText?: string;
+}
+
+export function createInput({ label, type = 'text', placeholder = '', helpText, errorText }: InputOptions): HTMLDivElement {
   const id = `field-${idCounter++}`;
   const wrapper = document.createElement('div');
   wrapper.className = 'flex flex-col gap-1.5';
