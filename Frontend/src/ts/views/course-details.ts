@@ -26,7 +26,7 @@ function daysUntil(iso: string | null): number | null {
   return Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
-function topicRow(topic: Topic, onToggle: () => void): HTMLElement {
+function topicRow(topic: Topic, onToggle: (row: HTMLElement, topic: Topic) => void): HTMLElement {
   const row = document.createElement('li');
   row.className =
     'flex items-center gap-4 rounded-lg border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 px-4 py-3.5 transition-colors';
@@ -44,13 +44,35 @@ function topicRow(topic: Topic, onToggle: () => void): HTMLElement {
     >
       ${topic.done ? '<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>' : ''}
     </button>
-    <span class="flex-1 text-sm ${topic.done ? 'line-through text-ink-400 dark:text-ink-200' : 'text-ink-900 dark:text-paper'}">${topic.title}</span>
+    <span class="topic-title flex-1 text-sm ${topic.done ? 'line-through text-ink-400 dark:text-ink-200' : 'text-ink-900 dark:text-paper'}">${topic.title}</span>
     <span class="text-xs text-ink-400 dark:text-ink-200 shrink-0">${topic.estMinutes} min</span>
   `;
 
-  row.querySelector('.topic-toggle')?.addEventListener('click', onToggle);
+  row.querySelector('.topic-toggle')?.addEventListener('click', () => onToggle(row, topic));
 
   return row;
+}
+
+function syncTopicRow(row: HTMLElement, topic: Topic): void {
+  const toggle = requireElement(row.querySelector<HTMLButtonElement>('.topic-toggle'), 'topic-toggle');
+  const title = requireElement(row.querySelector<HTMLElement>('.topic-title'), 'topic-title');
+
+  toggle.setAttribute('aria-pressed', String(topic.done));
+  toggle.setAttribute('aria-label', topic.done ? 'Mark incomplete' : 'Mark complete');
+  toggle.classList.toggle('bg-sage', topic.done);
+  toggle.classList.toggle('border-sage', topic.done);
+  toggle.classList.toggle('border-ink-200', !topic.done);
+  toggle.classList.toggle('dark:border-ink-400', !topic.done);
+  toggle.classList.toggle('hover:border-sage', !topic.done);
+  toggle.innerHTML = topic.done
+    ? '<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>'
+    : '';
+
+  title.classList.toggle('line-through', topic.done);
+  title.classList.toggle('text-ink-400', topic.done);
+  title.classList.toggle('dark:text-ink-200', topic.done);
+  title.classList.toggle('text-ink-900', !topic.done);
+  title.classList.toggle('dark:text-paper', !topic.done);
 }
 
 function addTopicRow(onAdd: (title: string) => void): HTMLElement {
@@ -82,6 +104,33 @@ function addTopicRow(onAdd: (title: string) => void): HTMLElement {
   return row;
 }
 
+function celebrateCourseComplete(): void {
+  document.querySelector('.completion-toast')?.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'completion-toast';
+  toast.innerHTML = `
+    <p class="font-hand text-2xl">Lecture finished</p>
+    <p class="text-sm opacity-80 mt-1">Nice work. Every topic is checked off.</p>
+  `;
+  document.body.appendChild(toast);
+
+  const colors = ['#E8C468', '#E0765E', '#8FAE8B', '#82AAFF', '#F2EFE6'];
+  for (let i = 0; i < 22; i++) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.style.setProperty('--confetti-color', colors[i % colors.length]);
+    piece.style.setProperty('--x', `${Math.round((Math.random() - 0.5) * 420)}px`);
+    piece.style.setProperty('--y', `${Math.round(120 + Math.random() * 220)}px`);
+    piece.style.setProperty('--spin', `${Math.round(Math.random() * 180)}deg`);
+    piece.style.setProperty('--delay', `${i * 14}ms`);
+    document.body.appendChild(piece);
+    window.setTimeout(() => piece.remove(), 1300);
+  }
+
+  window.setTimeout(() => toast.remove(), 3000);
+}
+
 export function renderCourseDetails(params: RouteParams): void {
   const app = getAppRoot();
   app.innerHTML = '';
@@ -102,37 +151,52 @@ export function renderCourseDetails(params: RouteParams): void {
     return;
   }
 
+  const selectedCourse = course;
   const section = document.createElement('section');
-  section.className = 'max-w-4xl mx-auto px-6 py-12';
+  section.className = 'animate-page max-w-4xl mx-auto px-6 py-12';
   app.appendChild(section);
+
+  function syncProgress(): void {
+    const progress = courseProgress(selectedCourse);
+    const hours = courseTotalHours(selectedCourse);
+    const doneCount = selectedCourse.topics.filter((t) => t.done).length;
+    const metaHours = section.querySelector<HTMLElement>('#course-hours');
+    const metaDone = section.querySelector<HTMLElement>('#course-done-count');
+    const progressBar = section.querySelector<HTMLElement>('#course-progress-bar');
+    const progressLabel = section.querySelector<HTMLElement>('#course-progress-label');
+
+    if (metaHours) metaHours.textContent = `~${hours}h of material left`;
+    if (metaDone) metaDone.textContent = `${doneCount}/${selectedCourse.topics.length} topics done`;
+    if (progressBar) progressBar.style.width = `${progress}%`;
+    if (progressLabel) progressLabel.textContent = `${progress}% complete`;
+  }
 
   function renderContent(): void {
     section.innerHTML = '';
-    if (!course) return;
 
-    const progress = courseProgress(course);
-    const hours = courseTotalHours(course);
-    const days = daysUntil(course.examDate);
-    const doneCount = course.topics.filter((t) => t.done).length;
+    const progress = courseProgress(selectedCourse);
+    const hours = courseTotalHours(selectedCourse);
+    const days = daysUntil(selectedCourse.examDate);
+    const doneCount = selectedCourse.topics.filter((t) => t.done).length;
 
     const header = document.createElement('div');
-    header.className = 'mb-10';
+    header.className = 'reveal-item mb-10';
     header.innerHTML = `
       <button type="button" id="back-link" class="text-xs font-mono surface-muted hover:accent mb-5 inline-flex items-center gap-1.5">
         ← back to courses
       </button>
-      <p class="font-hand text-2xl accent mb-1">${course.subject}</p>
-      <h1 class="font-display text-5xl text-ink-900 dark:text-paper mb-4">${course.title}</h1>
+      <p class="font-hand text-2xl accent mb-1">${selectedCourse.subject}</p>
+      <h1 class="font-display text-5xl text-ink-900 dark:text-paper mb-4">${selectedCourse.title}</h1>
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm surface-muted">
-        <span>${formatExamDate(course.examDate)}${days !== null && days >= 0 ? ` · ${days}d away` : ''}</span>
-        <span>~${hours}h of material left</span>
-        <span>${doneCount}/${course.topics.length} topics done</span>
+        <span>${formatExamDate(selectedCourse.examDate)}${days !== null && days >= 0 ? ` · ${days}d away` : ''}</span>
+        <span id="course-hours">~${hours}h of material left</span>
+        <span id="course-done-count">${doneCount}/${selectedCourse.topics.length} topics done</span>
       </div>
       <div class="mt-5 max-w-md">
         <div class="w-full h-2.5 rounded-full bg-ink-50 dark:bg-ink-900 overflow-hidden">
-          <div class="h-full bg-sage rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+          <div id="course-progress-bar" class="progress-fill h-full bg-sage rounded-full transition-all duration-500" style="width: ${progress}%"></div>
         </div>
-        <p class="text-xs surface-muted mt-1.5">${progress}% complete</p>
+        <p id="course-progress-label" class="text-xs surface-muted mt-1.5">${progress}% complete</p>
       </div>
       <div class="flex flex-wrap gap-3 mt-6">
         <button type="button" id="action-upload-syllabus" class="cta-secondary box-border rounded-md px-5 py-2.5 text-sm transition">Upload syllabus</button>
@@ -152,34 +216,44 @@ export function renderCourseDetails(params: RouteParams): void {
       });
 
     const listWrap = document.createElement('div');
+    listWrap.className = 'reveal-item';
+    listWrap.style.setProperty('--delay', '120ms');
     listWrap.innerHTML = `<p class="font-hand text-xl accent mb-4">topics</p>`;
     const list = document.createElement('ul');
     list.className = 'flex flex-col gap-2.5';
     listWrap.appendChild(list);
     section.appendChild(listWrap);
 
-    if (course.topics.length === 0) {
+    if (selectedCourse.topics.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'text-sm surface-muted italic mb-2.5';
       empty.textContent = 'No topics yet — add one below or upload a syllabus to generate a list.';
       list.appendChild(empty);
     }
 
-    course.topics.forEach((t) => {
-      list.appendChild(
-        topicRow(t, () => {
-          toggleTopic(course.id, t.id);
-          renderContent();
-        })
-      );
+    selectedCourse.topics.forEach((t, index) => {
+      const row = topicRow(t, (topicRowEl, topic) => {
+        const wasComplete = selectedCourse.topics.length > 0 && selectedCourse.topics.every((topic) => topic.done);
+        toggleTopic(selectedCourse.id, topic.id);
+        const isComplete = selectedCourse.topics.length > 0 && selectedCourse.topics.every((topic) => topic.done);
+        syncTopicRow(topicRowEl, topic);
+        syncProgress();
+        if (!wasComplete && isComplete) {
+          celebrateCourseComplete();
+        }
+      });
+      row.classList.add('reveal-item');
+      row.style.setProperty('--delay', `${180 + index * 55}ms`);
+      list.appendChild(row);
     });
 
-    list.appendChild(
-      addTopicRow((title) => {
-        addTopic(course.id, title);
-        renderContent();
-      })
-    );
+    const addRow = addTopicRow((title) => {
+      addTopic(selectedCourse.id, title);
+      renderContent();
+    });
+    addRow.classList.add('reveal-item');
+    addRow.style.setProperty('--delay', `${220 + selectedCourse.topics.length * 55}ms`);
+    list.appendChild(addRow);
   }
 
   renderContent();

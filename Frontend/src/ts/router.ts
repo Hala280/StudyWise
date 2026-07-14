@@ -77,6 +77,13 @@ function getPath(): string {
   return hash || '/';
 }
 
+function animateRouteShell(): void {
+  const shell = document.querySelector<HTMLElement>('main') ?? document.body;
+  shell.classList.remove('route-shell');
+  void shell.offsetWidth;
+  shell.classList.add('route-shell');
+}
+
 function runRoute(): void {
   // Tear down whatever the previous view registered, and cancel in-flight work.
   currentController?.abort();
@@ -98,6 +105,8 @@ function runRoute(): void {
     const cleanup = notFoundHandler({}, controller.signal);
     if (typeof cleanup === 'function') currentCleanup = cleanup;
   }
+
+  animateRouteShell();
 }
 
 export function navigate(path: string): void {

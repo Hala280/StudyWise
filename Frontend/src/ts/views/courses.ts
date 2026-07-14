@@ -38,7 +38,7 @@ function courseCard(course: Course): HTMLElement {
   const card = document.createElement('button');
   card.type = 'button';
   card.className =
-    'group text-left rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col gap-3';
+    'reveal-item group text-left rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col gap-3';
   card.addEventListener('click', () => navigate(`/courses/${course.id}`));
 
   card.innerHTML = `
@@ -52,7 +52,7 @@ function courseCard(course: Course): HTMLElement {
     <p class="text-xs text-ink-400 dark:text-ink-200">${formatExamDate(course.examDate)} · ~${hours}h left</p>
     <div class="mt-1">
       <div class="w-full h-2 rounded-full bg-ink-50 dark:bg-ink-900 overflow-hidden">
-        <div class="h-full ${styles.bar} rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+        <div class="progress-fill h-full ${styles.bar} rounded-full transition-all duration-500" style="width: ${progress}%"></div>
       </div>
       <p class="text-xs text-ink-400 dark:text-ink-200 mt-1.5">${progress}% complete</p>
     </div>
@@ -64,7 +64,7 @@ function courseCard(course: Course): HTMLElement {
 function emptyState(hasFilter: boolean, onClearFilter: () => void, onCreate: () => void): HTMLElement {
   const wrap = document.createElement('div');
   wrap.className =
-    'col-span-full flex flex-col items-center text-center gap-4 py-20 px-6 rounded-xl border-2 border-dashed border-ink-100 dark:border-ink-600';
+    'reveal-item col-span-full flex flex-col items-center text-center gap-4 py-20 px-6 rounded-xl border-2 border-dashed border-ink-100 dark:border-ink-600';
 
   wrap.innerHTML = `
     <p class="font-hand text-2xl accent">${hasFilter ? 'no matches on the board' : 'the board is empty'}</p>
@@ -92,7 +92,7 @@ function createCourseModal(onCreated: (course: Course) => void): { el: HTMLEleme
   overlay.id = 'create-course-overlay';
 
   overlay.innerHTML = `
-    <div class="w-full max-w-md rounded-xl bg-paper dark:bg-ink-600 border border-ink-100 dark:border-ink-400 shadow-xl p-6" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="animate-page w-full max-w-md rounded-xl bg-paper dark:bg-ink-600 border border-ink-100 dark:border-ink-400 shadow-xl p-6" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="flex items-start justify-between mb-5">
         <div>
           <p class="font-hand text-xl accent">new entry</p>
@@ -168,7 +168,7 @@ export function renderCourses(): void {
   let subjectFilter = 'all';
 
   const section = document.createElement('section');
-  section.className = 'max-w-6xl mx-auto px-6 py-12';
+  section.className = 'animate-page max-w-6xl mx-auto px-6 py-12';
 
   section.innerHTML = `
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-8">
@@ -240,7 +240,11 @@ export function renderCourses(): void {
       return;
     }
 
-    filtered.forEach((course) => grid.appendChild(courseCard(course)));
+    filtered.forEach((course, index) => {
+      const card = courseCard(course);
+      card.style.setProperty('--delay', `${index * 80}ms`);
+      grid.appendChild(card);
+    });
   }
 
   const modal = createCourseModal((course) => {

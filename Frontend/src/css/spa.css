@@ -139,3 +139,168 @@
 .text-syn-func { color: #82AAFF; }
 .text-syn-number { color: #F78C6C; }
 .text-syn-type { color: #FFCB6B; }
+
+.route-shell {
+  animation: route-fade 260ms ease-out both;
+}
+
+.route-shell #home-view > section {
+  animation: item-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.route-shell #home-view > section:nth-child(2) { animation-delay: 80ms; }
+.route-shell #home-view > section:nth-child(3) { animation-delay: 150ms; }
+.route-shell #home-view > section:nth-child(4) { animation-delay: 220ms; }
+.route-shell #home-view > section:nth-child(5) { animation-delay: 290ms; }
+.route-shell #home-view > section:nth-child(6) { animation-delay: 360ms; }
+
+.animate-page {
+  animation: page-rise 460ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.reveal-item {
+  animation: item-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: progress-fill 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--delay, 120ms);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: translateX(-120%);
+  animation: progress-sheen 1.2s ease-out 320ms both;
+}
+
+.topic-toggle {
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.topic-toggle:hover {
+  transform: scale(1.08);
+}
+
+.topic-toggle[aria-pressed="true"] {
+  animation: check-pop 280ms cubic-bezier(0.2, 0.9, 0.2, 1.35) both;
+}
+
+.completion-toast {
+  position: fixed;
+  left: 50%;
+  top: 92px;
+  z-index: 70;
+  width: min(420px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  border-radius: 10px;
+  padding: 14px 18px;
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+  animation: toast-in 2.8s ease both;
+}
+
+[data-appearance="dark"] .completion-toast {
+  background: rgba(242,239,230,0.96);
+  color: #1F3B32;
+}
+
+[data-appearance="light"] .completion-toast {
+  background: rgba(46,42,34,0.96);
+  color: #FBF9F3;
+}
+
+.confetti-piece {
+  position: fixed;
+  left: 50%;
+  top: 120px;
+  z-index: 69;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--confetti-color, #E8C468);
+  transform: translate(-50%, -50%) rotate(var(--spin, 0deg));
+  animation: confetti-burst 900ms ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+[data-mode="classic"] .chalk-underline svg path {
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  animation: chalk-draw 900ms ease-out 360ms forwards;
+}
+
+[data-mode="classic"] .eraser-smudge {
+  animation: smudge-breathe 5s ease-in-out infinite;
+}
+
+@keyframes route-fade {
+  from { opacity: 0.75; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes page-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes item-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes progress-fill {
+  to { transform: scaleX(1); }
+}
+
+@keyframes progress-sheen {
+  to { transform: translateX(120%); }
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0.86); }
+  70% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@keyframes toast-in {
+  0% { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+  12%, 82% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
+}
+
+@keyframes confetti-burst {
+  0% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--spin, 0deg)) scale(1); }
+  100% {
+    opacity: 0;
+    transform:
+      translate(calc(-50% + var(--x, 0px)), calc(-50% + var(--y, 160px)))
+      rotate(calc(var(--spin, 0deg) + 240deg))
+      scale(0.8);
+  }
+}
+
+@keyframes chalk-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes smudge-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.72; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
