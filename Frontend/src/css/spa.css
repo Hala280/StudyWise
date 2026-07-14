@@ -304,3 +304,7 @@
     transition-duration: 0.01ms !important;
   }
 }
+html,
+body {
+    min-height: 100%;
+}
