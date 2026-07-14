@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using StudyWise.Application.Interfaces;
 using StudyWise.Infrastructure.Parsing;
 using StudyWise.Infrastructure.Persistence;
@@ -18,6 +19,13 @@ builder.Services.AddScoped<ITopicService, TopicService>();
 
 builder.Services.AddHttpClient<GeminiSyllabusParser>();
 
+builder.Services
+    .AddIdentityApiEndpoints<IdentityUser<Guid>>()
+    .AddEntityFrameworkStores<StudyWiseDbContext>();
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -27,7 +35,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapIdentityApi<IdentityUser<Guid>>();
 app.MapControllers();
 
 app.Run();

@@ -5,7 +5,7 @@ using StudyWise.Domain.Entities;
 
 namespace StudyWise.Infrastructure.Persistence;
 
-public class StudyWiseDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
+public class StudyWiseDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>
 {
     public StudyWiseDbContext(DbContextOptions<StudyWiseDbContext> options) : base(options) { }
 

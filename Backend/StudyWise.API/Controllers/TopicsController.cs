@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using StudyWise.Application.DTOs.Topics;
 using StudyWise.Application.Interfaces;
 
 namespace StudyWise.API.Controllers;
 
+[Microsoft.AspNetCore.Authorization.Authorize]
 [ApiController]
 [Route("api/courses/{courseId}/[controller]")]
 public class TopicsController : ControllerBase
@@ -15,7 +17,7 @@ public class TopicsController : ControllerBase
         _topicService = topicService;
     }
 
-    private Guid CurrentUserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpGet]
     public async Task<IActionResult> GetByCourse(int courseId)

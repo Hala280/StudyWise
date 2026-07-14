@@ -2,9 +2,11 @@
 using StudyWise.Application.DTOs.Topics;
 using StudyWise.Application.Interfaces;
 using StudyWise.Infrastructure.Parsing;
+using System.Security.Claims;
 
 namespace StudyWise.API.Controllers;
 
+[Microsoft.AspNetCore.Authorization.Authorize]
 [ApiController]
 [Route("api/courses/{courseId}/syllabus")]
 public class SyllabusController : ControllerBase
@@ -18,7 +20,7 @@ public class SyllabusController : ControllerBase
         _topicService = topicService;
     }
 
-    private Guid CurrentUserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpPost("parse")]
     public async Task<IActionResult> ParseSyllabus(int courseId, IFormFile file)

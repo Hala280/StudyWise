@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StudyWise.Application.DTOs.Courses;
 using StudyWise.Application.Interfaces;
+using System.Security.Claims;
 
 namespace StudyWise.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class CoursesController : ControllerBase
@@ -15,8 +18,8 @@ public class CoursesController : ControllerBase
         _courseService = courseService;
     }
 
-    // Temporary hardcoded userId until auth is wired up
-    private Guid CurrentUserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private Guid CurrentUserId =>
+        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
