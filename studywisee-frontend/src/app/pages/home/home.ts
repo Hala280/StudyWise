@@ -1,3 +1,4 @@
+
 import { Component, AfterViewInit, OnDestroy, ElementRef, NgZone } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 
@@ -47,6 +48,39 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     const $ = <T extends Element = Element>(sel: string) => root.querySelector<T>(sel);
     const $$ = <T extends Element = Element>(sel: string) => Array.from(root.querySelectorAll<T>(sel));
 
+    // ═══ ROBOT INTRO ═══
+    // Only plays once per browser session (i.e. when the site is first opened),
+    // not every time the user navigates to another page and back to Home.
+    const introScreen = $<HTMLElement>('#algo-intro');
+    const textContainer = $<HTMLElement>('#algo-text-out');
+    const mouth = $<HTMLElement>('#robot-mouth');
+    const introKey = 'sw_intro_shown';
+    let introAlreadyShown = false;
+    try { introAlreadyShown = sessionStorage.getItem(introKey) === '1'; } catch { /* noop */ }
+
+    if (introAlreadyShown) {
+      introScreen?.classList.add('algo-intro-skip');
+    } else if (introScreen && textContainer && mouth) {
+      try { sessionStorage.setItem(introKey, '1'); } catch { /* noop */ }
+
+      const text = "Welcome to StudyWise, Hero! 🚀 Booting up your AI Tutor...";
+      let index = 0;
+      mouth.classList.add('talking');
+
+      const typeWriter = () => {
+        if (index < text.length) {
+          textContainer.innerHTML += text.charAt(index);
+          index++;
+          setTimeout(typeWriter, 50);
+        } else {
+          mouth.classList.remove('talking');
+          setTimeout(() => {
+            introScreen.classList.add('hidden');
+          }, 1000);
+        }
+      };
+      setTimeout(typeWriter, 1300);
+    }
     // ═══ PARTICLES CANVAS ═══
     const c = $<HTMLCanvasElement>('#particles');
     if (c) {

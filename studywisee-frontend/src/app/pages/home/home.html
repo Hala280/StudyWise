@@ -1,3 +1,138 @@
+<!-- ════════════════ ALGORITHMIC INTRO (Full Body Robot) ════════════════ -->
+<div id="algo-intro" class="algo-intro">
+
+  <!-- "Wow" opening reveal: curtain doors split apart from the center + a light burst -->
+  <div class="intro-curtain curtain-left"></div>
+  <div class="intro-curtain curtain-right"></div>
+  <div class="intro-flash"></div>
+
+  <!-- Colorful ambient background (matches home page palette) -->
+  <div class="intro-bg">
+    <div class="intro-blob blob-1"></div>
+    <div class="intro-blob blob-2"></div>
+    <div class="intro-blob blob-3"></div>
+    <div class="intro-grid"></div>
+  </div>
+
+  <!-- Mind-map style connections (NotebookLM-inspired) — all sources stacked on the left, converging into the robot, rendered in the site's green -->
+  <svg class="intro-links" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path id="linkWeb"   class="link-path" d="M18,11 C 34,15 44,26 56,45" />
+    <path id="linkAudio" class="link-path" d="M18,30 C 34,33 44,39 56,45" />
+    <path id="linkVideo" class="link-path" d="M18,49 C 36,49 46,47 56,45" />
+    <path id="linkDoc"   class="link-path" d="M18,68 C 34,62 44,53 56,45" />
+    <path id="linkPdf"   class="link-path" d="M18,87 C 34,78 44,60 56,45" />
+    <path id="linkOut" class="link-path link-out" d="M56,45 C 68,45 78,45 92,45" />
+
+    <circle r="0.9" class="link-dot" fill="var(--green)"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#linkWeb"/></animateMotion></circle>
+    <circle r="0.9" class="link-dot" fill="var(--green)"><animateMotion dur="2.8s" begin="0.5s" repeatCount="indefinite"><mpath href="#linkAudio"/></animateMotion></circle>
+    <circle r="0.9" class="link-dot" fill="var(--green)"><animateMotion dur="2.3s" begin="0.9s" repeatCount="indefinite"><mpath href="#linkVideo"/></animateMotion></circle>
+    <circle r="0.9" class="link-dot" fill="var(--green)"><animateMotion dur="3.1s" begin="1.2s" repeatCount="indefinite"><mpath href="#linkDoc"/></animateMotion></circle>
+    <circle r="0.9" class="link-dot" fill="var(--green)"><animateMotion dur="2.9s" begin="0.3s" repeatCount="indefinite"><mpath href="#linkPdf"/></animateMotion></circle>
+    <circle r="1" class="link-dot link-dot-out" fill="var(--cyan2)"><animateMotion dur="2s" repeatCount="indefinite"><mpath href="#linkOut"/></animateMotion></circle>
+  </svg>
+
+  <!-- Source mockup cards, stacked on the left — same layout as the reference, restyled to match the site -->
+  <div class="mm-card mm-web">
+    <div class="mm-card-head">
+      <div class="mm-icon">🌐</div>
+      <div class="mm-bar title"></div>
+    </div>
+    <div class="mm-card-body">
+      <div class="mm-bar"></div>
+      <div class="mm-bar short"></div>
+    </div>
+  </div>
+
+  <div class="mm-card mm-audio">
+    <div class="mm-card-head">
+      <div class="mm-icon">🎧</div>
+      <div class="mm-bar title"></div>
+    </div>
+    <div class="mm-wave">
+      <span style="height:35%"></span><span style="height:60%"></span><span style="height:90%"></span>
+      <span style="height:45%"></span><span style="height:75%"></span><span style="height:30%"></span>
+      <span style="height:55%"></span><span style="height:80%"></span><span style="height:40%"></span>
+    </div>
+  </div>
+
+  <div class="mm-card mm-video">
+    <div class="mm-card-head">
+      <div class="mm-icon">▶️</div>
+      <div class="mm-bar title"></div>
+    </div>
+    <div class="mm-thumb"><div class="mm-play"></div></div>
+    <div class="mm-progress"></div>
+  </div>
+
+  <div class="mm-card mm-doc">
+    <div class="mm-card-head">
+      <div class="mm-icon">📝</div>
+      <div class="mm-bar title"></div>
+    </div>
+    <div class="mm-card-body">
+      <div class="mm-bar"></div>
+      <div class="mm-bar"></div>
+      <div class="mm-bar short"></div>
+    </div>
+  </div>
+
+  <div class="mm-card mm-pdf">
+    <div class="mm-card-head">
+      <div class="mm-icon">📄</div>
+      <div class="mm-bar title"></div>
+    </div>
+    <div class="mm-card-body">
+      <div class="mm-bar"></div>
+      <div class="mm-bar short"></div>
+    </div>
+  </div>
+
+  <!-- The result: what comes OUT of the robot, filling the empty right side -->
+  <div class="mm-output">
+    <div class="mm-output-icon">📚</div>
+    <div class="mm-output-body">
+      <div class="mm-bar title"></div>
+      <div class="mm-bar short"></div>
+    </div>
+  </div>
+
+  <div class="robot-container">
+    <div class="robot-full">
+      <!-- الرأس -->
+      <div class="robot-head">
+        <div class="robot-antenna"></div>
+        <div class="robot-eyes">
+          <div class="robot-eye"></div>
+          <div class="robot-eye"></div>
+        </div>
+        <div class="robot-mouth" id="robot-mouth"></div>
+      </div>
+      
+      <!-- الرقبة -->
+      <div class="robot-neck"></div>
+      
+      <!-- الجسم والأذرع -->
+      <div class="robot-torso-wrap">
+        <div class="robot-arm arm-left"></div>
+        <div class="robot-body-core">
+          <div class="core-light"></div>
+        </div>
+        <div class="robot-arm arm-right"></div>
+      </div>
+      
+      <!-- الأقدام والنفاثات -->
+      <div class="robot-legs">
+        <div class="robot-leg leg-left"><div class="thruster"></div></div>
+        <div class="robot-leg leg-right"><div class="thruster"></div></div>
+      </div>
+    </div>
+    
+    <!-- النص الترحيبي -->
+    <div class="algo-text-container">
+      <span id="algo-text-out"></span><span class="cursor">Welcome to studyWise my students </span>
+    </div>
+  </div>
+</div>
 
 <!-- ════════════════ NAVBAR ════════════════ -->
 <nav class="navbar" id="navbar">
@@ -87,13 +222,23 @@
 <div class="stat-val">14-day</div>
 <div class="stat-lbl">Streak</div>
 </div>
+<div class="hero-stat-bl">
+<div class="stat-icon">🎯</div>
+<div class="stat-val">92%</div>
+<div class="stat-lbl">Goals Hit</div>
+</div>
+<div class="hero-stat-br">
+<div class="stat-icon">📚</div>
+<div class="stat-val">500+</div>
+<div class="stat-lbl">Study Hours</div>
+</div>
 <div class="hero-content">
-<div class="hero-tag"><div class="hero-tag-dot"></div> AI-powered for students</div>
-<h1 class="hero-title">Master Your Time,<br/><span class="grad">Powered by AI.</span></h1>
+<div class="hero-tag"><div class="hero-tag-dot"></div> Assisstent for students</div>
+<h1 class="hero-title">Master Your Time,<br/><span class="grad">Powered by StudyWise.</span></h1>
 <p class="hero-sub">Personalized study plans, real-time progress tracking, and an AI tutor available 24/7 — everything a student needs to excel.</p>
 <div class="hero-btns">
 <button class="btn-primary-hero" onclick="openModal('register')">🚀 Start Learning Free</button>
-<button class="btn-ghost-hero">▶ Watch Demo</button>
+<!-- <button class="btn-ghost-hero">▶ Watch Demo</button> -->
 </div>
 </div>
 <div class="hero-stat-right">
