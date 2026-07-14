@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>StudyWise</title>
-<script type="module" src="/src/js/prepaint.ts"></script>
+<script type="module" src="/src/ts/prepaint.ts"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&family=Patrick+Hand&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/src/css/spa.css" />
@@ -17,7 +17,8 @@
     </a>
 
     <div class="hidden sm:flex items-center gap-8 text-sm font-hand text-lg surface-muted">
-      <a href="#" class="hover:opacity-80" data-nav-label>Home</a>
+      <a href="/" class="hover:opacity-80" data-nav-label>Home</a>
+      <a href="#/courses" class="hover:opacity-80" data-nav-label>Courses</a>
     </div>
 
     <div class="flex items-center gap-3">
@@ -42,7 +43,8 @@
     </div>
   </nav>
 
-  <main class="max-w-6xl mx-auto px-6">
+  <main>
+  <div id="home-view" class="max-w-6xl mx-auto px-6">
     <section class="dev-only py-14">
       <div class="editor-window rounded-lg overflow-hidden">
         <div class="flex items-center text-xs surface-muted border-b hairline">
@@ -86,11 +88,11 @@
         right when you're about to forget. That's the whole trick.
       </p>
       <div class="mt-10 flex flex-wrap items-center gap-5">
-        <button class="cta-primary rounded-md px-7 py-3.5 text-base font-semibold hover:brightness-110 transition">
+        <button type="button" id="cta-start" class="cta-primary rounded-md px-7 py-3.5 text-base font-semibold hover:brightness-110 transition">
           <span id="cta-label">Raise your hand — start free</span>
         </button>
-        <button class="cta-secondary box-border rounded-md px-7 py-3.5 text-base transition">
-          <span id="cta2-label">Watch the lesson</span>
+        <button type="button" id="cta-upload-syllabus" class="cta-secondary box-border rounded-md px-7 py-3.5 text-base transition">
+          <span id="cta2-label">Upload your syllabus</span>
         </button>
       </div>
     </section>
@@ -167,6 +169,9 @@
 <span class="text-syn-keyword">}</span></pre>
       </div>
     </section>
+  </div>
+
+  <div id="app"></div>
   </main>
 
   <footer class="border-t hairline">
@@ -177,7 +182,8 @@
     </div>
   </footer>
 
-  <script type="module" src="/src/js/spa.ts"></script>
+  <script type="module" src="/src/ts/spa.ts"></script>
+  <script type="module" src="/src/ts/main.ts"></script>
 
 </body>
 </html>
