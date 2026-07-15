@@ -8,6 +8,7 @@ import {
   overflowMinutes,
   type StudyBlock,
 } from '../../ts/data/planner';
+import { showPrompt, showToast } from "../Toast/alerts";
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_START_MIN = 0;
@@ -197,7 +198,7 @@ interface DragState {
         <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
         </svg>
-        <span>Click a block to view or edit it, or drag it to a new day or time. Resizing and auto conflict-resolution aren't built yet — overlaps are allowed and flagged.</span>
+        <span>Click a block to view or edit it, or drag it to a new day or time, overlapped times will show an alert.</span>
       </div>
 
       <div class="rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 overflow-hidden">
@@ -729,7 +730,7 @@ export class PlannerPage {
 
   openAddModal(): void {
     if (this.courses().length === 0) {
-      alert('Create a course first — study blocks need a course to belong to.');
+      showToast('Create a course first — study blocks need a course to belong to.', 'error');
       return;
     }
     this.addModalOpen.set(true);
@@ -804,10 +805,16 @@ export class PlannerPage {
     this.closeEditModal();
   }
 
-  deleteEditingBlock(): void {
+  // Add the 'async' keyword to the method
+  async deleteEditingBlock(): Promise<void> {
     const current = this.editingBlock();
     if (!current) return;
-    if (!confirm("Delete this study block? This can't be undone.")) return;
+
+    // Await the promise to get the actual boolean value (true/false)
+    const confirmed = await showPrompt("Delete this study block? This can't be undone.");
+    if (!confirmed) return; 
+
+    // These will now wait and only execute if the user clicked "Yes"
     this.deleteBlock(current.id);
     this.blocksVersion.update((v) => v + 1);
     this.closeEditModal();

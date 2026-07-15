@@ -2,6 +2,7 @@ import { Component, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { StudyWiseApi } from '../services/studywise-api';
 import { Course, courseProgress, courseTotalHours, type Topic } from '../../ts/data/courses';
+import { showToast } from '../Toast/alerts';
 
 function formatExamDate(iso: string | null): string {
   if (!iso) return 'No exam date set';
@@ -48,7 +49,6 @@ interface ConfettiPiece {
           </div>
           <div class="flex flex-wrap gap-3 mt-6">
             <button type="button" class="cta-secondary box-border rounded-md px-5 py-2.5 text-sm transition" (click)="uploadSyllabus()">Upload syllabus</button>
-            <button type="button" class="cta-secondary box-border rounded-md px-5 py-2.5 text-sm transition" (click)="generatePlan()">Generate plan</button>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ export class CourseDetailsPage {
   }
 
   generatePlan(): void {
-    alert('Plan generation is coming soon — this will build a study schedule from your topics.');
+    showToast('Plan generation is coming soon — this will build a study schedule from your topics.');
   }
 
   toggle(topicId: string): void {
