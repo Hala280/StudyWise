@@ -54,10 +54,6 @@ import { login } from '../../ts/data/auth';
         New to StudyWise?
         <a routerLink="/register" class="accent font-medium hover:opacity-80">Create an account</a>
       </p>
-
-      <p class="text-xs surface-muted mt-10 border-t hairline pt-5">
-        Demo account: <span class="font-mono">demo&#64;studywise.com</span> / <span class="font-mono">password123</span>
-      </p>
     </section>
   `,
 })
