@@ -17,6 +17,7 @@ import { currentUser, firstNameOf, initialOf, logout } from '../ts/data/auth';
         <a routerLink="/courses" routerLinkActive="accent" class="hover:opacity-80">Courses</a>
         <a routerLink="/planner" routerLinkActive="accent" class="hover:opacity-80">Planner</a>
         <a routerLink="/upload" routerLinkActive="accent" class="hover:opacity-80">Upload syllabus</a>
+        <a routerLink="/progress" routerLinkActive="accent" class="hover:opacity-80">Progress</a>
       </div>
 
       <div class="flex items-center gap-4">
@@ -69,6 +70,14 @@ import { currentUser, firstNameOf, initialOf, logout } from '../ts/data/auth';
                   (click)="closeMenu()"
                 >
                   Upload syllabus
+                </a>
+                <a
+                  routerLink="/progress"
+                  class="block px-4 py-2 text-sm text-ink-900 dark:text-paper hover:bg-ink-50 dark:hover:bg-ink-900 transition-colors"
+                  role="menuitem"
+                  (click)="closeMenu()"
+                >
+                  Progress
                 </a>
                 <button
                   type="button"
