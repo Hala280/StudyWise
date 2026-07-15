@@ -21,8 +21,24 @@ import { currentUser, firstNameOf, initialOf, logout, refreshCurrentUser } from 
       </div>
 
       <div class="flex items-center gap-4">
-        <button type="button" class="appearance-toggle" aria-label="Toggle light/dark" (click)="toggleAppearance()">
-          <span>{{ appearance === 'dark' ? 'Light' : 'Dark' }}</span>
+        <!-- Modernized theme toggle button containing Sun/Moon SVG icons -->
+        <button 
+          type="button" 
+          class="w-10 h-10 rounded-full flex items-center justify-center border border-[#9b59f7]/20 text-var(--color-white) hover:bg-[#9b59f7]/10 transition-all duration-200" 
+          aria-label="Toggle light/dark mode" 
+          (click)="toggleAppearance()"
+        >
+          @if (appearance === 'dark') {
+            <!-- Sun Icon (Shows in dark mode to switch to light) -->
+            <svg class="w-5 h-5 text-[#e3c376]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5M12 19.5V21M4.22 4.22l1.06 1.06M18.72 18.72l1.06 1.06M3 12h1.5M19.5 12H21M4.22 19.78l1.06-1.06M18.72 5.28l1.06-1.06M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9z" />
+            </svg>
+          } @else {
+            <!-- Moon Icon (Shows in light mode to switch to dark) -->
+            <svg class="w-5 h-5 text-[#5b21b6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+          }
         </button>
 
         @if (user(); as u) {
@@ -112,12 +128,41 @@ import { currentUser, firstNameOf, initialOf, logout, refreshCurrentUser } from 
   `,
 })
 export class AppComponent {
-  appearance = document.documentElement.dataset['appearance'] ?? 'dark';
+  appearance: 'light' | 'dark' = 'dark';
   user = currentUser;
   menuOpen = signal(false);
 
   constructor(private router: Router) {
     void refreshCurrentUser().catch(() => undefined);
+    this.initializeTheme();
+  }
+
+  /**
+   * Safe check during initialization to sync state with local storage 
+   * and apply correct CSS classes before rendering.
+   */
+  private initializeTheme(): void {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Default to 'dark' matching your default preference if nothing saved
+    const isDark = saved === 'dark' || (!saved && prefersDark) || (!saved && !prefersDark);
+    
+    this.appearance = isDark ? 'dark' : 'light';
+    this.applyTheme(isDark);
+  }
+
+  /**
+   * Handles the DOM mutation to cleanly toggle classes and datasets on document.documentElement
+   */
+  private applyTheme(isDark: boolean): void {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.dataset['appearance'] = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.dataset['appearance'] = 'light';
+    }
   }
 
   name(): string {
@@ -131,8 +176,11 @@ export class AppComponent {
   }
 
   toggleAppearance(): void {
-    this.appearance = this.appearance === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset['appearance'] = this.appearance;
+    const nextDark = this.appearance !== 'dark';
+    this.appearance = nextDark ? 'dark' : 'light';
+    
+    this.applyTheme(nextDark);
+    localStorage.setItem('theme', this.appearance);
   }
 
   toggleMenu(event: MouseEvent): void {
