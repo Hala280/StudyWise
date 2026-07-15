@@ -1,6 +1,7 @@
 import { Component, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Course, courseProgress, courseTotalHours, getCourses } from '../../ts/data/courses';
+import { StudyWiseApi } from '../services/studywise-api';
+import { Course, courseProgress, courseTotalHours } from '../../ts/data/courses';
 
 const SUBJECT_BAR: Record<Course['color'], string> = {
   amber: 'bg-amber',
@@ -26,32 +27,10 @@ interface DifficultTopic {
   title: string;
   courseTitle: string;
   color: Course['color'];
-  missedReviews: number; // mock signal for "difficulty" — times marked incomplete / revisited
+  missedReviews: number;
 }
 
-// Mock week of study time — stands in for real session-tracking data, which
-// doesn't exist yet. Same shape every load on purpose (easy to demo, easy
-// to swap for a real chart later).
-const MOCK_WEEK: DayStudied[] = [
-  { label: 'Mon', minutes: 45 },
-  { label: 'Tue', minutes: 70 },
-  { label: 'Wed', minutes: 0 },
-  { label: 'Thu', minutes: 85 },
-  { label: 'Fri', minutes: 40 },
-  { label: 'Sat', minutes: 110 },
-  { label: 'Sun', minutes: 25 },
-];
-
-// Mock "hardest topics" — in a real version this would come from spaced-
-// repetition miss counts or self-rated difficulty. Titles are illustrative,
-// not pulled from the real course store, since that data doesn't exist yet.
-const MOCK_DIFFICULT_TOPICS: DifficultTopic[] = [
-  { id: 'diff-1', title: 'Eigenvalues and eigenvectors', courseTitle: 'Linear Algebra Fundamentals', color: 'amber', missedReviews: 6 },
-  { id: 'diff-2', title: 'Cell membrane transport', courseTitle: 'Cell Structure & Function', color: 'sage', missedReviews: 5 },
-  { id: 'diff-3', title: 'Détente and arms control', courseTitle: 'Cold War Timeline', color: 'coral', missedReviews: 4 },
-  { id: 'diff-4', title: 'Diagonalization', courseTitle: 'Linear Algebra Fundamentals', color: 'amber', missedReviews: 3 },
-  { id: 'diff-5', title: 'Mitosis vs meiosis', courseTitle: 'Cell Structure & Function', color: 'sage', missedReviews: 3 },
-];
+const EMPTY_WEEK: DayStudied[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => ({ label, minutes: 0 }));
 
 @Component({
   standalone: true,
@@ -66,8 +45,8 @@ const MOCK_DIFFICULT_TOPICS: DifficultTopic[] = [
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
         <div class="reveal-item rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6 flex flex-col justify-between" style="--delay: 0ms">
           <div class="flex items-start justify-between">
-            <p class="text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-200">Current streak</p>
-            <span class="text-lg">🔥</span>
+          <p class="text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-200">Current streak</p>
+            <span class="text-lg">•</span>
           </div>
           <p class="font-display text-5xl text-ink-900 dark:text-paper mt-3">{{ streakDays() }}<span class="text-xl font-body font-normal surface-muted ml-1">days</span></p>
           <p class="text-xs surface-muted mt-2">Best streak: {{ bestStreak() }} days</p>
@@ -119,12 +98,12 @@ const MOCK_DIFFICULT_TOPICS: DifficultTopic[] = [
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <!-- Time studied chart placeholder -->
+        <!-- Time studied chart -->
         <div class="reveal-item lg:col-span-3 rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6" style="--delay: 100ms">
           <div class="flex items-start justify-between mb-6">
             <div>
               <p class="font-hand text-xl accent mb-1">time studied</p>
-              <p class="text-xs surface-muted">Last 7 days · placeholder data</p>
+              <p class="text-xs surface-muted">Last 7 days</p>
             </div>
             <span class="text-xs text-ink-400 dark:text-ink-200">{{ weekMinutesTotal() }} min total</span>
           </div>
@@ -149,10 +128,15 @@ const MOCK_DIFFICULT_TOPICS: DifficultTopic[] = [
         <!-- Most difficult topics -->
         <div class="reveal-item lg:col-span-2 rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6" style="--delay: 140ms">
           <p class="font-hand text-xl accent mb-1">toughest topics</p>
-          <p class="text-xs surface-muted mb-5">Ranked by missed reviews · mock data</p>
+          <p class="text-xs surface-muted mb-5">Longest remaining topics</p>
 
-          <ul class="flex flex-col gap-3">
-            @for (topic of difficultTopics(); track topic.id; let i = $index) {
+          @if (difficultTopics().length === 0) {
+            <div class="rounded-lg border-2 border-dashed border-ink-100 dark:border-ink-600 px-4 py-8 text-center">
+              <p class="text-sm surface-muted">No unfinished topics to review.</p>
+            </div>
+          } @else {
+            <ul class="flex flex-col gap-3">
+              @for (topic of difficultTopics(); track topic.id; let i = $index) {
               <li class="reveal-item flex items-center gap-3" [style.--delay]="(i * 60) + 'ms'">
                 <span class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold" [class]="chipClass2(topic.color)">
                   {{ i + 1 }}
@@ -161,24 +145,39 @@ const MOCK_DIFFICULT_TOPICS: DifficultTopic[] = [
                   <p class="text-sm text-ink-900 dark:text-paper truncate">{{ topic.title }}</p>
                   <p class="text-xs surface-muted truncate">{{ topic.courseTitle }}</p>
                 </div>
-                <span class="text-xs text-ink-400 dark:text-ink-200 shrink-0">{{ topic.missedReviews }}× missed</span>
+                <span class="text-xs text-ink-400 dark:text-ink-200 shrink-0">~{{ topic.missedReviews }}m</span>
               </li>
-            }
-          </ul>
+              }
+            </ul>
+          }
         </div>
       </div>
     </section>
   `,
 })
 export class ProgressPage {
-  courses = signal<Course[]>(getCourses());
+  courses = signal<Course[]>([]);
 
-  // Mock streak data — no real session log exists yet.
-  streakDays = signal(4);
-  bestStreak = signal(11);
+  streakDays = signal(0);
+  bestStreak = signal(0);
 
-  week = signal<DayStudied[]>(MOCK_WEEK);
-  difficultTopics = signal<DifficultTopic[]>(MOCK_DIFFICULT_TOPICS);
+  week = signal<DayStudied[]>(EMPTY_WEEK);
+  difficultTopics = computed<DifficultTopic[]>(() =>
+    this.courses()
+      .flatMap((course) =>
+        course.topics
+          .filter((topic) => !topic.done)
+          .map((topic) => ({
+            id: topic.id,
+            title: topic.title,
+            courseTitle: course.title,
+            color: course.color,
+            missedReviews: topic.estMinutes,
+          }))
+      )
+      .sort((a, b) => b.missedReviews - a.missedReviews)
+      .slice(0, 5)
+  );
 
   totalTopics = computed(() => this.courses().reduce((sum, c) => sum + c.topics.length, 0));
   totalDone = computed(() => this.courses().reduce((sum, c) => sum + c.topics.filter((t) => t.done).length, 0));
@@ -188,7 +187,15 @@ export class ProgressPage {
 
   private maxDayMinutes = computed(() => Math.max(...this.week().map((d) => d.minutes), 1));
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private api: StudyWiseApi
+  ) {
+    this.api.getCourses().subscribe({
+      next: (courses) => this.courses.set(courses),
+      error: () => this.courses.set([]),
+    });
+  }
 
   progress(course: Course): number {
     return courseProgress(course);
@@ -222,7 +229,7 @@ export class ProgressPage {
   weekComparisonLabel(): string {
     const total = this.weekMinutesTotal();
     if (total === 0) return 'No sessions logged yet';
-    return 'Placeholder — real tracking coming soon';
+    return 'Based on completed study sessions';
   }
 
   goToCourse(id: string): void {

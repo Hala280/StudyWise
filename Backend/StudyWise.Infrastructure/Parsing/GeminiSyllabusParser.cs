@@ -1,6 +1,6 @@
-﻿using System.Net.Http.Json;
-using System.Text;
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 
 namespace StudyWise.Infrastructure.Parsing;
@@ -31,7 +31,7 @@ public class GeminiSyllabusParser
             You are a study planner assistant. Extract all topics/chapters from this syllabus.
             Return ONLY a valid JSON array with no extra text, no markdown, no code blocks.
             Each item must have: title (string), estimatedHours (int), orderIndex (int starting from 1).
-            
+
             Syllabus:
             {syllabusText}
             """;
@@ -51,8 +51,41 @@ public class GeminiSyllabusParser
         };
 
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
-        var response = await _httpClient.PostAsJsonAsync(url, requestBody);
-        response.EnsureSuccessStatusCode();
+        HttpResponseMessage? response = null;
+
+        const int maxAttempts = 3;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                response = await _httpClient.PostAsJsonAsync(url, requestBody);
+            }
+            catch (HttpRequestException ex)
+            {
+                // Some HttpClient pipelines (e.g. Polly / resilience handlers) throw
+                // instead of returning the response, surfacing the status code on the exception.
+                if (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests && attempt < maxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2 * attempt));
+                    continue;
+                }
+
+                return ParseLocally(syllabusText);
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests && attempt < maxAttempts)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2 * attempt));
+                continue;
+            }
+
+            break;
+        }
+
+        if (response is null || !response.IsSuccessStatusCode)
+        {
+            return ParseLocally(syllabusText);
+        }
 
         var result = await response.Content.ReadAsStringAsync();
         var json = JsonDocument.Parse(result);
@@ -65,14 +98,87 @@ public class GeminiSyllabusParser
             .GetProperty("text")
             .GetString() ?? "[]";
 
-        // Clean any accidental markdown fences
         rawText = rawText.Trim().TrimStart('`');
         if (rawText.StartsWith("json")) rawText = rawText[4..];
         rawText = rawText.TrimEnd('`').Trim();
 
-        return JsonSerializer.Deserialize<List<ParsedTopic>>(rawText, new JsonSerializerOptions
+        var parsed = JsonSerializer.Deserialize<List<ParsedTopic>>(rawText, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         }) ?? new List<ParsedTopic>();
+
+        return parsed.Count > 0 ? parsed : ParseLocally(syllabusText);
+    }
+
+    private static List<ParsedTopic> ParseLocally(string syllabusText)
+    {
+        var topics = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var rawLine in syllabusText.Split('\n'))
+        {
+            var line = CleanLine(rawLine);
+            if (!LooksLikeTopic(line)) continue;
+
+            var title = NormalizeTitle(line);
+            if (title.Length < 4 || title.Length > 120) continue;
+            if (!seen.Add(title)) continue;
+
+            topics.Add(title);
+            if (topics.Count >= 20) break;
+        }
+
+        if (topics.Count == 0)
+        {
+            topics = syllabusText
+                .Split('.', '\n')
+                .Select(CleanLine)
+                .Where(line => line.Length is >= 8 and <= 120)
+                .Where(line => !IsAdministrativeLine(line))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(12)
+                .ToList();
+        }
+
+        return topics
+            .Select((title, index) => new ParsedTopic
+            {
+                Title = title,
+                EstimatedHours = 1,
+                OrderIndex = index + 1
+            })
+            .ToList();
+    }
+
+    private static bool LooksLikeTopic(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line) || IsAdministrativeLine(line)) return false;
+
+        return Regex.IsMatch(
+            line,
+            @"\b(chapter|unit|module|week|topic|lecture|lesson|section|part)\b|^\d+[\.\)]\s+|^[IVXLCDM]+[\.\)]\s+",
+            RegexOptions.IgnoreCase);
+    }
+
+    private static bool IsAdministrativeLine(string line)
+    {
+        return Regex.IsMatch(
+            line,
+            @"\b(email|office hours|grading|attendance|policy|policies|required text|textbook|assignment|exam date|instructor|professor|credits?)\b",
+            RegexOptions.IgnoreCase);
+    }
+
+    private static string CleanLine(string line)
+    {
+        return Regex.Replace(line.Trim(), @"\s+", " ");
+    }
+
+    private static string NormalizeTitle(string line)
+    {
+        var title = Regex.Replace(line, @"^[-*•\s]+", "");
+        title = Regex.Replace(title, @"^(week|unit|module|chapter|topic|lecture|lesson|section)\s+\d+\s*[:\-–]\s*", "", RegexOptions.IgnoreCase);
+        title = Regex.Replace(title, @"^\d+[\.\)]\s*", "");
+        title = Regex.Replace(title, @"^[IVXLCDM]+[\.\)]\s*", "", RegexOptions.IgnoreCase);
+        return CleanLine(title);
     }
 }

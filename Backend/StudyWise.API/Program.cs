@@ -10,12 +10,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularDevClient", policy =>
+        policy.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
 
 builder.Services.AddDbContext<StudyWiseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ITopicService, TopicService>();
+builder.Services.AddScoped<IStudyBlockService, StudyBlockService>();
 
 builder.Services.AddHttpClient<GeminiSyllabusParser>();
 
@@ -35,6 +44,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AngularDevClient");
 
 app.UseAuthentication();
 app.UseAuthorization();

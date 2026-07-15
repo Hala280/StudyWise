@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { register } from '../../ts/data/auth';
 
 @Component({
@@ -88,13 +88,16 @@ export class RegisterPage {
   error = signal<string | null>(null);
   submitting = signal(false);
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   fieldClass(): string {
     return 'rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-600 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper placeholder:text-ink-200 dark:placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150';
   }
 
-  submit(event: SubmitEvent): void {
+  async submit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.error.set(null);
 
@@ -121,7 +124,10 @@ export class RegisterPage {
     }
 
     this.submitting.set(true);
-    const result = register(name, email, password);
+    const result = await register(name, email, password).catch(() => ({
+      ok: false,
+      error: 'Could not reach the backend. Make sure the API is running.',
+    }));
     this.submitting.set(false);
 
     if (!result.ok) {
@@ -129,6 +135,6 @@ export class RegisterPage {
       return;
     }
 
-    this.router.navigate(['/']);
+    this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') || '/');
   }
 }

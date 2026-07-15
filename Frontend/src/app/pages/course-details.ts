@@ -1,6 +1,7 @@
 import { Component, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { addTopic, Course, courseProgress, courseTotalHours, getCourseById, toggleTopic, type Topic } from '../../ts/data/courses';
+import { StudyWiseApi } from '../services/studywise-api';
+import { Course, courseProgress, courseTotalHours, type Topic } from '../../ts/data/courses';
 
 function formatExamDate(iso: string | null): string {
   if (!iso) return 'No exam date set';
@@ -112,9 +113,9 @@ interface ConfettiPiece {
       </section>
     } @else {
       <section class="max-w-2xl mx-auto px-6 py-24 text-center">
-        <p class="font-hand text-2xl accent mb-3">page torn out</p>
-        <h1 class="font-display text-4xl text-ink-900 dark:text-paper mb-4">Course not found</h1>
-        <p class="text-sm surface-muted mb-8">That course doesn't exist, or it may have been removed.</p>
+        <p class="font-hand text-2xl accent mb-3">{{ loading() ? 'opening notes' : 'page torn out' }}</p>
+        <h1 class="font-display text-4xl text-ink-900 dark:text-paper mb-4">{{ loading() ? 'Loading course' : 'Course not found' }}</h1>
+        <p class="text-sm surface-muted mb-8">{{ error() || "That course doesn't exist, or it may have been removed." }}</p>
         <button type="button" class="cta-primary rounded-md px-6 py-3 text-sm font-semibold hover:brightness-110 transition" (click)="backToCourses()">Back to Courses</button>
       </section>
     }
@@ -140,6 +141,8 @@ interface ConfettiPiece {
 })
 export class CourseDetailsPage {
   course = signal<Course | undefined>(undefined);
+  loading = signal(true);
+  error = signal<string | null>(null);
   showToast = signal(false);
   confetti = signal<ConfettiPiece[]>([]);
 
@@ -147,10 +150,13 @@ export class CourseDetailsPage {
 
   @Input()
   set id(value: string) {
-    this.course.set(getCourseById(value));
+    this.loadCourse(value);
   }
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private api: StudyWiseApi
+  ) {}
 
   progress(): number {
     const c = this.course();
@@ -182,7 +188,8 @@ export class CourseDetailsPage {
   }
 
   uploadSyllabus(): void {
-    this.router.navigate(['/upload']);
+    const c = this.course();
+    this.router.navigate(['/upload'], c ? { queryParams: { courseId: c.id } } : undefined);
   }
 
   generatePlan(): void {
@@ -193,15 +200,23 @@ export class CourseDetailsPage {
     const c = this.course();
     if (!c) return;
 
-    const wasComplete = c.topics.length > 0 && c.topics.every((t) => t.done);
-    toggleTopic(c.id, topicId);
-    const updated = getCourseById(c.id);
-    this.course.set(updated);
-    const isComplete = updated ? updated.topics.length > 0 && updated.topics.every((t) => t.done) : false;
+    const topic = c.topics.find((t) => t.id === topicId);
+    if (!topic) return;
 
-    if (!wasComplete && isComplete) {
-      this.celebrate();
-    }
+    const wasComplete = c.topics.length > 0 && c.topics.every((t) => t.done);
+    const nextTopic = { ...topic, done: !topic.done };
+    this.api.updateTopic(c.id, nextTopic).subscribe({
+      next: (updatedTopic) => {
+        const updatedCourse = {
+          ...c,
+          topics: c.topics.map((t) => (t.id === topicId ? updatedTopic : t)),
+        };
+        this.course.set(updatedCourse);
+        const isComplete = updatedCourse.topics.length > 0 && updatedCourse.topics.every((t) => t.done);
+        if (!wasComplete && isComplete) this.celebrate();
+      },
+      error: () => this.error.set('Could not update the topic. Please try again.'),
+    });
   }
 
   submitAddTopic(event: SubmitEvent): void {
@@ -214,9 +229,29 @@ export class CourseDetailsPage {
     const title = input?.value.trim();
     if (!title) return;
 
-    addTopic(c.id, title);
-    this.course.set(getCourseById(c.id));
-    form.reset();
+    this.api.createTopic(c.id, title).subscribe({
+      next: (topic) => {
+        this.course.set({ ...c, topics: [...c.topics, topic] });
+        form.reset();
+      },
+      error: () => this.error.set('Could not add the topic. Please try again.'),
+    });
+  }
+
+  private loadCourse(id: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.api.getCourse(id).subscribe({
+      next: (course) => {
+        this.course.set(course);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.course.set(undefined);
+        this.error.set('Could not load this course. Log in, then try again.');
+        this.loading.set(false);
+      },
+    });
   }
 
   private celebrate(): void {

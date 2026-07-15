@@ -8,6 +8,7 @@ import { getCourseById } from './courses';
 
 export interface StudyBlock {
   id: string;
+  topicId?: string;
   courseId: string;
   topicTitle: string;
   day: number; // 0 = Monday ... 6 = Sunday

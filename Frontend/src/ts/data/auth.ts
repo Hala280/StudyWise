@@ -1,26 +1,34 @@
 import { signal } from '@angular/core';
 
+const API_BASE_URL = 'http://localhost:5098';
+
 export interface User {
   id: string;
   name: string;
   email: string;
 }
 
-interface StoredUser extends User {
-  password: string;
+const STORAGE_KEY = 'studywise.currentUser';
+
+function readStoredUser(): User | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
 }
 
-let idCounter = 100;
-function nextId(): string {
-  idCounter += 1;
-  return `user-${idCounter}`;
+function setCurrentUser(user: User | null): void {
+  currentUser.set(user);
+  if (user) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
-const users: StoredUser[] = [
-  { id: 'user-1', name: 'Demo Student', email: 'demo@studywise.com', password: 'password123' },
-];
-
-export const currentUser = signal<User | null>(null);
+export const currentUser = signal<User | null>(readStoredUser());
 
 export interface AuthResult {
   ok: boolean;
@@ -28,36 +36,98 @@ export interface AuthResult {
   user?: User;
 }
 
-export function login(email: string, password: string): AuthResult {
-  const normalizedEmail = email.trim().toLowerCase();
-  const found = users.find((u) => u.email.toLowerCase() === normalizedEmail);
+async function authRequest(path: string, body: unknown): Promise<Response> {
+  return fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(body),
+  });
+}
 
-  if (!found || found.password !== password) {
+async function getSessionInfo(): Promise<Response> {
+  return fetch(`${API_BASE_URL}/manage/info`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+}
+
+function userFromEmail(email: string, name?: string): User {
+  const normalizedEmail = email.trim().toLowerCase();
+  return {
+    id: normalizedEmail,
+    name: name?.trim() || normalizedEmail.split('@')[0],
+    email: normalizedEmail,
+  };
+}
+
+export async function refreshCurrentUser(): Promise<User | null> {
+  const response = await getSessionInfo();
+
+  if (!response.ok) {
+    setCurrentUser(null);
+    return null;
+  }
+
+  const info = (await response.json()) as { email?: string };
+  const email = info.email?.trim();
+  if (!email) {
+    setCurrentUser(null);
+    return null;
+  }
+
+  const stored = readStoredUser();
+  const user = userFromEmail(email, stored?.email.toLowerCase() === email.toLowerCase() ? stored.name : undefined);
+  setCurrentUser(user);
+  return user;
+}
+
+export async function login(email: string, password: string): Promise<AuthResult> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const response = await authRequest('/login?useCookies=true', {
+    email: normalizedEmail,
+    password,
+  });
+
+  if (!response.ok) {
     return { ok: false, error: 'Incorrect email or password.' };
   }
 
-  const user: User = { id: found.id, name: found.name, email: found.email };
-  currentUser.set(user);
+  const user = userFromEmail(normalizedEmail);
+  setCurrentUser(user);
   return { ok: true, user };
 }
 
-export function register(name: string, email: string, password: string): AuthResult {
+export async function register(name: string, email: string, password: string): Promise<AuthResult> {
   const normalizedEmail = email.trim().toLowerCase();
+  const response = await authRequest('/register', {
+    email: normalizedEmail,
+    password,
+  });
 
-  if (users.some((u) => u.email.toLowerCase() === normalizedEmail)) {
-    return { ok: false, error: 'An account with that email already exists.' };
+  if (!response.ok) {
+    return { ok: false, error: 'An account with that email may already exist, or the password is too weak.' };
   }
 
-  const stored: StoredUser = { id: nextId(), name: name.trim(), email: email.trim(), password };
-  users.push(stored);
-
-  const user: User = { id: stored.id, name: stored.name, email: stored.email };
-  currentUser.set(user);
-  return { ok: true, user };
+  const loginResult = await login(normalizedEmail, password);
+  const user = userFromEmail(normalizedEmail, name);
+  setCurrentUser(user);
+  return loginResult.ok ? { ok: true, user } : loginResult;
 }
 
-export function logout(): void {
-  currentUser.set(null);
+export async function logout(): Promise<void> {
+  setCurrentUser(null);
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({}),
+  });
+
+  if (!response.ok) {
+    throw new Error('Logout failed.');
+  }
 }
 
 export function firstNameOf(user: User): string {

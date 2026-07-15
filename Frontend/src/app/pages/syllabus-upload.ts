@@ -1,7 +1,8 @@
 import { Component, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { addTopic, Course, getCourseById, getCourses } from '../../ts/data/courses';
+import { ActivatedRoute, Router } from '@angular/router';
+import { StudyWiseApi } from '../services/studywise-api';
+import { Course } from '../../ts/data/courses';
 
 type UploadStatus = 'idle' | 'uploading' | 'parsed' | 'failed';
 
@@ -12,19 +13,6 @@ interface ParsedTopic {
   include: boolean;
 }
 
-// Fixed mock "parse result" — stands in for whatever a real parser would
-// eventually extract from the uploaded file. Same shape every time, on
-// purpose, so this page is easy to demo and easy to swap out later.
-const MOCK_PARSED_TOPICS: Omit<ParsedTopic, 'include'>[] = [
-  { id: 'parsed-1', title: 'Course introduction & syllabus overview', estMinutes: 20 },
-  { id: 'parsed-2', title: 'Key definitions and terminology', estMinutes: 30 },
-  { id: 'parsed-3', title: 'Chapter 1: Foundational concepts', estMinutes: 45 },
-  { id: 'parsed-4', title: 'Chapter 2: Core mechanisms', estMinutes: 50 },
-  { id: 'parsed-5', title: 'Midterm review topics', estMinutes: 40 },
-  { id: 'parsed-6', title: 'Chapter 3: Applications & case studies', estMinutes: 45 },
-  { id: 'parsed-7', title: 'Final exam scope', estMinutes: 35 },
-];
-
 @Component({
   standalone: true,
   imports: [FormsModule],
@@ -34,7 +22,7 @@ const MOCK_PARSED_TOPICS: Omit<ParsedTopic, 'include'>[] = [
         <p class="font-hand text-2xl accent mb-1">new material</p>
         <h1 class="font-display text-5xl text-ink-900 dark:text-paper mb-4">Upload a syllabus</h1>
         <p class="text-sm surface-muted max-w-lg leading-relaxed">
-          Drop in a syllabus and we'll pull out a topic list you can add straight to a course. This is a mock parse for now — no file is actually read yet.
+          Drop in a PDF syllabus and we'll pull out a topic list straight into the selected course.
         </p>
       </div>
 
@@ -78,7 +66,7 @@ const MOCK_PARSED_TOPICS: Omit<ParsedTopic, 'include'>[] = [
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3.75 3.75 0 014.133 5.02A4.5 4.5 0 0117.25 19.5H6.75z" />
               </svg>
               <p class="text-sm font-medium text-ink-900 dark:text-paper mb-1">Drag and drop a file here</p>
-              <p class="text-xs surface-muted mb-5">PDF, DOCX, or image — up to 10MB</p>
+              <p class="text-xs surface-muted mb-5">PDF only — up to 10MB</p>
               <label class="cta-secondary box-border rounded-md px-5 py-2.5 text-sm transition inline-block cursor-pointer">
                 Choose a file
                 <input type="file" class="sr-only" (change)="onFileChosen($event)" />
@@ -102,7 +90,7 @@ const MOCK_PARSED_TOPICS: Omit<ParsedTopic, 'include'>[] = [
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
               <p class="text-sm font-medium text-ink-900 dark:text-paper mb-1">Upload failed</p>
-              <p class="text-xs surface-muted mb-5">{{ fileName() }} couldn't be parsed. Try again with a different file.</p>
+              <p class="text-xs surface-muted mb-5">{{ error() || fileName() + " couldn't be parsed. Try again with a different file." }}</p>
               <button type="button" class="cta-secondary box-border rounded-md px-5 py-2.5 text-sm transition" (click)="reset()">Try again</button>
             }
           }
@@ -160,11 +148,11 @@ const MOCK_PARSED_TOPICS: Omit<ParsedTopic, 'include'>[] = [
               <button type="button" class="cta-secondary box-border rounded-md px-5 py-2.5 text-sm transition" (click)="reset()">Cancel</button>
               <button
                 type="button"
-                [disabled]="selectedCount() === 0 || !courseId()"
+                [disabled]="parsedTopics().length === 0 || !courseId()"
                 class="cta-primary rounded-md px-5 py-2.5 text-sm font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 (click)="confirmAddTopics()"
               >
-                Add {{ selectedCount() }} topic{{ selectedCount() === 1 ? '' : 's' }}
+                Open course
               </button>
             </div>
           </div>
@@ -181,12 +169,13 @@ const MOCK_PARSED_TOPICS: Omit<ParsedTopic, 'include'>[] = [
   `,
 })
 export class SyllabusUploadPage {
-  courses = signal<Course[]>(getCourses());
+  courses = signal<Course[]>([]);
   courseId = signal<string>('');
 
   status = signal<UploadStatus>('idle');
   dragOver = signal(false);
   fileName = signal('');
+  error = signal<string | null>(null);
 
   parsedTopics = signal<ParsedTopic[]>([]);
 
@@ -197,9 +186,23 @@ export class SyllabusUploadPage {
   selectedCount = computed(() => this.parsedTopics().filter((t) => t.include).length);
   allSelected = computed(() => this.parsedTopics().length > 0 && this.parsedTopics().every((t) => t.include));
 
-  constructor(private router: Router) {
-    const first = this.courses()[0];
-    if (first) this.courseId.set(first.id);
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private api: StudyWiseApi
+  ) {
+    this.api.getCourses().subscribe({
+      next: (courses) => {
+        this.courses.set(courses);
+        const requestedCourseId = this.route.snapshot.queryParamMap.get('courseId');
+        const target = courses.find((course) => course.id === requestedCourseId) ?? courses[0];
+        if (target) this.courseId.set(target.id);
+      },
+      error: () => {
+        this.error.set('Could not load courses. Log in, then try again.');
+        this.status.set('failed');
+      },
+    });
   }
 
   onDragOver(event: DragEvent): void {
@@ -218,24 +221,39 @@ export class SyllabusUploadPage {
     if (this.status() !== 'idle') return;
 
     const file = event.dataTransfer?.files?.[0];
-    this.startUpload(file?.name ?? 'syllabus.pdf');
+    this.startUpload(file);
   }
 
   onFileChosen(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    this.startUpload(file?.name ?? 'syllabus.pdf');
+    this.startUpload(file);
   }
 
-  private startUpload(name: string): void {
-    this.fileName.set(name);
+  private startUpload(file?: File): void {
+    if (!file || !this.courseId()) return;
+
+    this.fileName.set(file.name);
+    this.error.set(null);
     this.status.set('uploading');
 
-    // Mock async parse — swap this for a real upload/parse call later.
-    window.setTimeout(() => {
-      this.parsedTopics.set(MOCK_PARSED_TOPICS.map((t) => ({ ...t, include: true })));
-      this.status.set('parsed');
-    }, 1400);
+    this.api.parseSyllabus(this.courseId(), file).subscribe({
+      next: (result) => {
+        this.parsedTopics.set(
+          result.topics.map((t) => ({
+            id: String(t.id),
+            title: t.title,
+            estMinutes: t.estimatedHours * 60,
+            include: true,
+          }))
+        );
+        this.status.set('parsed');
+      },
+      error: (err) => {
+        this.error.set(typeof err.error === 'string' ? err.error : 'The backend could not parse this PDF.');
+        this.status.set('failed');
+      },
+    });
   }
 
   toggleTopic(id: string): void {
@@ -252,19 +270,16 @@ export class SyllabusUploadPage {
   reset(): void {
     this.status.set('idle');
     this.fileName.set('');
+    this.error.set(null);
     this.parsedTopics.set([]);
   }
 
   confirmAddTopics(): void {
     const id = this.courseId();
-    const course = getCourseById(id);
+    const course = this.courses().find((c) => c.id === id);
     if (!course) return;
 
     const toAdd = this.parsedTopics().filter((t) => t.include);
-    for (const t of toAdd) {
-      addTopic(course.id, t.title, t.estMinutes);
-    }
-
     this.confirmedCount.set(toAdd.length);
     this.confirmedCourseTitle.set(course.title);
     this.confirmedToast.set(true);

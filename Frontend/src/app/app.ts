@@ -1,6 +1,6 @@
 import { Component, HostListener, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { currentUser, firstNameOf, initialOf, logout } from '../ts/data/auth';
+import { currentUser, firstNameOf, initialOf, logout, refreshCurrentUser } from '../ts/data/auth';
 
 @Component({
   selector: 'app-root',
@@ -116,7 +116,9 @@ export class AppComponent {
   user = currentUser;
   menuOpen = signal(false);
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    void refreshCurrentUser().catch(() => undefined);
+  }
 
   name(): string {
     const u = this.user();
@@ -142,8 +144,8 @@ export class AppComponent {
     this.menuOpen.set(false);
   }
 
-  onLogout(): void {
-    logout();
+  async onLogout(): Promise<void> {
+    await logout().catch(() => undefined);
     this.closeMenu();
     this.router.navigate(['/']);
   }

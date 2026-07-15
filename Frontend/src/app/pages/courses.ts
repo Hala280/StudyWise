@@ -1,7 +1,8 @@
 import { Component, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Course, courseProgress, courseTotalHours, createCourse, getCourses } from '../../ts/data/courses';
+import { StudyWiseApi } from '../services/studywise-api';
+import { Course, courseProgress, courseTotalHours } from '../../ts/data/courses';
 
 const SUBJECT_STYLES: Record<Course['color'], { chip: string; bar: string }> = {
   amber: { chip: 'bg-amber-light/40 text-amber-dark dark:bg-amber/20 dark:text-amber-light', bar: 'bg-amber' },
@@ -58,6 +59,14 @@ function formatExamDate(iso: string | null): string {
           }
         </select>
       </div>
+
+      @if (loading()) {
+        <p class="text-sm surface-muted mb-6">Loading courses...</p>
+      }
+
+      @if (error()) {
+        <p class="text-sm text-[#C15A3F] dark:text-[#E0765E] mb-6" role="alert">{{ error() }}</p>
+      }
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         @if (filteredCourses().length === 0) {
@@ -160,10 +169,12 @@ function formatExamDate(iso: string | null): string {
   `,
 })
 export class CoursesPage {
-  courses = signal<Course[]>(getCourses());
+  courses = signal<Course[]>([]);
   query = signal('');
   subjectFilter = signal('all');
   createModalOpen = signal(false);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   subjects = computed(() => Array.from(new Set(this.courses().map((c) => c.subject))).sort());
 
@@ -177,7 +188,12 @@ export class CoursesPage {
     });
   });
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private api: StudyWiseApi
+  ) {
+    this.loadCourses();
+  }
 
   subjectStyles(course: Course) {
     return SUBJECT_STYLES[course.color];
@@ -226,10 +242,29 @@ export class CoursesPage {
 
     if (!title || !subject) return;
 
-    const course = createCourse({ title, subject, examDate });
-    form.reset();
-    this.courses.set(getCourses());
-    this.closeCreateModal();
-    this.router.navigate(['/courses', course.id]);
+    this.api.createCourse({ title, subject, examDate }).subscribe({
+      next: (course) => {
+        form.reset();
+        this.courses.update((courses) => [...courses, course]);
+        this.closeCreateModal();
+        this.router.navigate(['/courses', course.id]);
+      },
+      error: () => this.error.set('Could not create the course. Please log in and try again.'),
+    });
+  }
+
+  private loadCourses(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.api.getCourses().subscribe({
+      next: (courses) => {
+        this.courses.set(courses);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Could not load courses. Log in, then try again.');
+        this.loading.set(false);
+      },
+    });
   }
 }

@@ -1,16 +1,11 @@
 import { Component, ElementRef, QueryList, ViewChildren, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { getCourses, type Course } from '../../ts/data/courses';
+import { StudyWiseApi } from '../services/studywise-api';
+import { type Course } from '../../ts/data/courses';
 import {
-  getStudyBlocksByCourse,
   findConflictingBlockIds,
-  courseColorFor,
-  createStudyBlock,
-  updateStudyBlock,
-  deleteStudyBlock,
   isOvernightBlock,
   overflowMinutes,
-  MINUTES_PER_DAY,
   type StudyBlock,
 } from '../../ts/data/planner';
 
@@ -190,6 +185,14 @@ interface DragState {
         </div>
       }
 
+      @if (loading()) {
+        <p class="text-sm surface-muted mb-4">Loading planner...</p>
+      }
+
+      @if (error()) {
+        <p class="text-sm text-[#C15A3F] dark:text-[#E0765E] mb-4" role="alert">{{ error() }}</p>
+      }
+
       <div class="flex items-center gap-2 mb-4 text-xs surface-muted">
         <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
@@ -286,7 +289,13 @@ interface DragState {
           <form class="flex flex-col gap-4" (submit)="submitAddForm($event)">
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium text-ink-900 dark:text-paper">Course</label>
-              <select name="courseId" required class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150">
+              <select
+                name="courseId"
+                required
+                [ngModel]="addCourseId()"
+                (ngModelChange)="onAddCourseChange($event)"
+                class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150"
+              >
                 @for (course of courses(); track course.id) {
                   <option [value]="course.id">{{ course.title }}</option>
                 }
@@ -294,7 +303,11 @@ interface DragState {
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium text-ink-900 dark:text-paper">Topic</label>
-              <input name="topicTitle" type="text" required placeholder="e.g. Review chapter 4" class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper placeholder:text-ink-200 dark:placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150" />
+              <select name="topicId" required class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150">
+                @for (topic of topicsForCourse(addCourseId()); track topic.id) {
+                  <option [value]="topic.id">{{ topic.title }}</option>
+                }
+              </select>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
@@ -336,7 +349,13 @@ interface DragState {
           <form class="flex flex-col gap-4" (submit)="submitEditForm($event)">
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium text-ink-900 dark:text-paper">Course</label>
-              <select name="courseId" required [value]="editingBlock()!.courseId" class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150">
+              <select
+                name="courseId"
+                required
+                [ngModel]="editCourseId()"
+                (ngModelChange)="onEditCourseChange($event)"
+                class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150"
+              >
                 @for (course of courses(); track course.id) {
                   <option [value]="course.id">{{ course.title }}</option>
                 }
@@ -344,7 +363,11 @@ interface DragState {
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium text-ink-900 dark:text-paper">Topic</label>
-              <input name="topicTitle" type="text" required [value]="editingBlock()!.topicTitle" class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper placeholder:text-ink-200 dark:placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150" />
+              <select name="topicId" required [value]="editingBlock()!.topicId" class="rounded-lg border border-ink-200 dark:border-ink-400 bg-white dark:bg-ink-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-paper focus:outline-none focus:ring-2 focus:ring-amber transition-shadow duration-150">
+                @for (topic of topicsForCourse(editCourseId()); track topic.id) {
+                  <option [value]="topic.id">{{ topic.title }}</option>
+                }
+              </select>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
@@ -390,9 +413,14 @@ export class PlannerPage {
   readonly gridHeight = GRID_HEIGHT;
   readonly pxPerMin = PX_PER_MIN;
 
-  courses = signal<Course[]>(getCourses());
+  courses = signal<Course[]>([]);
+  blocks = signal<StudyBlock[]>([]);
   courseFilter = signal<string>('all');
   blocksVersion = signal(0); // bump to force recompute after mutations
+  loading = signal(true);
+  error = signal<string | null>(null);
+  addCourseId = signal('');
+  editCourseId = signal('');
 
   addModalOpen = signal(false);
   editModalOpen = signal(false);
@@ -400,9 +428,16 @@ export class PlannerPage {
 
   private drag: DragState | null = null;
 
+  constructor(private api: StudyWiseApi) {
+    this.loadPlanner();
+  }
+
   visibleBlocks(): StudyBlock[] {
     this.blocksVersion();
-    return getStudyBlocksByCourse(this.courseFilter() as 'all' | string);
+    const blocks = this.blocks();
+    const courseId = this.courseFilter();
+    if (courseId === 'all') return blocks;
+    return blocks.filter((b) => b.courseId === courseId);
   }
 
   conflictIds(): Set<string> {
@@ -506,8 +541,13 @@ export class PlannerPage {
     return this.courses().find((c) => c.id === courseId)?.title ?? 'Unknown course';
   }
 
+  topicsForCourse(courseId: string) {
+    return this.courses().find((course) => course.id === courseId)?.topics ?? [];
+  }
+
   blockStyles(block: StudyBlock) {
-    return BLOCK_STYLES[courseColorFor(block.courseId)];
+    const color = this.courses().find((course) => course.id === block.courseId)?.color ?? 'ink';
+    return BLOCK_STYLES[color];
   }
 
   isCompact(card: RenderCard): boolean {
@@ -575,10 +615,28 @@ export class PlannerPage {
     this.courseFilter.set(value);
   }
 
+  onAddCourseChange(value: string): void {
+    this.addCourseId.set(value);
+  }
+
+  onEditCourseChange(value: string): void {
+    this.editCourseId.set(value);
+    const firstTopic = this.topicsForCourse(value)[0];
+    const current = this.editingBlock();
+    if (current && firstTopic) {
+      this.editingBlock.set({
+        ...current,
+        topicId: firstTopic.id,
+        courseId: value,
+        topicTitle: firstTopic.title,
+      });
+    }
+  }
+
   removeBlock(event: Event, blockId: string): void {
     event.stopPropagation();
     event.preventDefault();
-    deleteStudyBlock(blockId);
+    this.deleteBlock(blockId);
     this.blocksVersion.update((v) => v + 1);
   }
 
@@ -652,13 +710,14 @@ export class PlannerPage {
     if (this.drag.moved) {
       const changed = this.drag.liveDay !== this.drag.originDay || this.drag.liveStart !== this.drag.originStart;
       if (changed) {
-        updateStudyBlock(this.drag.block.id, { day: this.drag.liveDay, startMinutes: this.drag.liveStart });
+        this.updateBlock(this.drag.block.id, { day: this.drag.liveDay, startMinutes: this.drag.liveStart });
       }
       this.drag = null;
       this.blocksVersion.update((v) => v + 1);
     } else {
       const openedBlock = this.drag.block;
       this.drag = null;
+      this.editCourseId.set(openedBlock.courseId);
       this.editingBlock.set(openedBlock);
       this.editModalOpen.set(true);
     }
@@ -685,26 +744,29 @@ export class PlannerPage {
     const form = event.currentTarget as HTMLFormElement;
     const data = new FormData(form);
     const courseId = String(data.get('courseId') || '');
-    const topicTitle = String(data.get('topicTitle') || '').trim();
+    const topicId = String(data.get('topicId') || '');
     const day = Number(data.get('day'));
     const duration = Number(data.get('duration'));
     const startRaw = String(data.get('start') || '09:00');
     const [hh, mm] = startRaw.split(':').map(Number);
+    const topic = this.findTopic(courseId, topicId);
 
-    if (!courseId || !topicTitle || Number.isNaN(day) || Number.isNaN(duration)) return;
+    if (!courseId || !topic || Number.isNaN(day) || Number.isNaN(duration)) return;
 
-    createStudyBlock({
-      courseId,
-      topicTitle,
-      day,
+    this.api.createStudyBlock({
+      topicId,
+      scheduledDate: this.dateForDay(day),
       startMinutes: hh * 60 + mm,
       durationMinutes: duration,
+    }).subscribe({
+      next: (block) => {
+        this.blocks.update((blocks) => [...blocks, block]);
+        form.reset();
+        this.blocksVersion.update((v) => v + 1);
+        this.closeAddModal();
+      },
+      error: () => this.error.set('Could not save that study block. Please try again.'),
     });
-
-    form.reset();
-    this.courses.set(getCourses());
-    this.blocksVersion.update((v) => v + 1);
-    this.closeAddModal();
   }
 
   closeEditModal(): void {
@@ -720,17 +782,19 @@ export class PlannerPage {
     const form = event.currentTarget as HTMLFormElement;
     const data = new FormData(form);
     const courseId = String(data.get('courseId') || '');
-    const topicTitle = String(data.get('topicTitle') || '').trim();
+    const topicId = String(data.get('topicId') || '');
     const day = Number(data.get('day'));
     const duration = Number(data.get('duration'));
     const startRaw = String(data.get('start') || '09:00');
     const [hh, mm] = startRaw.split(':').map(Number);
+    const topic = this.findTopic(courseId, topicId);
 
-    if (!courseId || !topicTitle || Number.isNaN(day) || Number.isNaN(duration)) return;
+    if (!courseId || !topic || Number.isNaN(day) || Number.isNaN(duration)) return;
 
-    updateStudyBlock(current.id, {
+    this.updateBlock(current.id, {
+      topicId,
       courseId,
-      topicTitle,
+      topicTitle: topic.title,
       day,
       startMinutes: hh * 60 + mm,
       durationMinutes: duration,
@@ -744,8 +808,88 @@ export class PlannerPage {
     const current = this.editingBlock();
     if (!current) return;
     if (!confirm("Delete this study block? This can't be undone.")) return;
-    deleteStudyBlock(current.id);
+    this.deleteBlock(current.id);
     this.blocksVersion.update((v) => v + 1);
     this.closeEditModal();
+  }
+
+  private loadPlanner(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.api.getCourses().subscribe({
+      next: (courses) => {
+        this.courses.set(courses);
+        if (!this.addCourseId() && courses.length > 0) this.addCourseId.set(courses[0].id);
+        this.loadStudyBlocks();
+      },
+      error: () => {
+        this.error.set('Could not load planner data. Log in, then try again.');
+        this.courses.set([]);
+        this.blocks.set([]);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private loadStudyBlocks(): void {
+    this.api.getStudyBlocks(this.dateForDay(0), this.dateForDay(6)).subscribe({
+      next: (blocks) => {
+        this.blocks.set(blocks);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Could not load saved study blocks. Please try again.');
+        this.blocks.set([]);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private updateBlock(id: string, patch: Partial<Omit<StudyBlock, 'id'>>): void {
+    const current = this.blocks().find((block) => block.id === id);
+    if (!current) return;
+
+    const updatedBlock = { ...current, ...patch };
+    this.blocks.update((blocks) => blocks.map((block) => (block.id === id ? updatedBlock : block)));
+    const updated = this.blocks().find((block) => block.id === id) ?? null;
+    if (updated && this.editingBlock()?.id === id) this.editingBlock.set(updated);
+
+    if (!updatedBlock.topicId) return;
+    this.api.updateStudyBlock(updatedBlock, this.dateForDay(updatedBlock.day)).subscribe({
+      next: (saved) => {
+        this.blocks.update((blocks) => blocks.map((block) => (block.id === id ? saved : block)));
+        if (this.editingBlock()?.id === id) this.editingBlock.set(saved);
+      },
+      error: () => {
+        this.blocks.update((blocks) => blocks.map((block) => (block.id === id ? current : block)));
+        this.error.set('Could not save the study block changes. Please try again.');
+      },
+    });
+  }
+
+  private deleteBlock(id: string): void {
+    const previous = this.blocks();
+    this.blocks.update((blocks) => blocks.filter((block) => block.id !== id));
+    this.api.deleteStudyBlock(id).subscribe({
+      error: () => {
+        this.blocks.set(previous);
+        this.error.set('Could not delete that study block. Please try again.');
+      },
+    });
+  }
+
+  private findTopic(courseId: string, topicId: string) {
+    return this.courses().find((course) => course.id === courseId)?.topics.find((topic) => topic.id === topicId);
+  }
+
+  private dateForDay(day: number): string {
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7) + day);
+    const year = monday.getFullYear();
+    const month = String(monday.getMonth() + 1).padStart(2, '0');
+    const date = String(monday.getDate()).padStart(2, '0');
+    return `${year}-${month}-${date}`;
   }
 }
