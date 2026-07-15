@@ -6,6 +6,13 @@
 import { registerRoute, registerNotFound, startRouter, getAppRoot } from './router';
 import { renderCourses } from './views/courses';
 import { renderCourseDetails } from './views/course-details';
+import { renderPlanner } from './views/planner';
+
+registerRoute('/planner', () => {
+  showApp();
+  renderPlanner();
+});
+
 
 function requireElement<T extends Element>(element: T | null, id: string): T {
   if (!element) {
