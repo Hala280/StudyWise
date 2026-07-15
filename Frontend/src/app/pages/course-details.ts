@@ -182,7 +182,7 @@ export class CourseDetailsPage {
   }
 
   uploadSyllabus(): void {
-    alert('Syllabus upload is coming soon — this will parse a PDF or image into topics automatically.');
+    this.router.navigate(['/upload']);
   }
 
   generatePlan(): void {
