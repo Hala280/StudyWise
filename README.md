@@ -97,7 +97,3 @@ The app runs on `http://localhost:4200` and expects the backend to be reachable 
 - Smarter estimated-hours logic (right now both the LLM and fallback parser default to fairly simple heuristics)
 - Support for non-PDF syllabus formats (Word docs, plain text, maybe even a pasted-in block of text)
 - Editable topic titles in the review screen before confirming, instead of just include/exclude
-
----
-
-Built as a student side project to fix the "syllabus week 1 → blank study planner" gap.
