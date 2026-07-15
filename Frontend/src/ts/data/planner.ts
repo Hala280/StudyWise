@@ -63,12 +63,67 @@ export function deleteStudyBlock(id: string): void {
   if (idx !== -1) store.splice(idx, 1);
 }
 
-/** Two blocks conflict if they're on the same day and their time ranges overlap. */
+/**
+ * Minutes past midnight where a block ends, unbounded — a block starting at
+ * 23:30 (1410) for 90 minutes ends at 1500, i.e. 60 minutes into the next
+ * calendar day. Callers that need "minutes into the day it spills onto" can
+ * subtract MINUTES_PER_DAY themselves; kept raw here so duration math stays
+ * simple everywhere else.
+ */
+export const MINUTES_PER_DAY = 24 * 60;
+
+export function blockEndMinutes(b: StudyBlock): number {
+  return b.startMinutes + b.durationMinutes;
+}
+
+/** True if a block runs past midnight into the following calendar day. */
+export function isOvernightBlock(b: StudyBlock): boolean {
+  return blockEndMinutes(b) > MINUTES_PER_DAY;
+}
+
+/**
+ * How far the block spills into the next day, in minutes past that next
+ * midnight. 0 for blocks that don't spill over.
+ */
+export function overflowMinutes(b: StudyBlock): number {
+  return Math.max(0, blockEndMinutes(b) - MINUTES_PER_DAY);
+}
+
+/**
+ * Two blocks conflict if their time ranges overlap on a shared calendar day.
+ * This now accounts for overnight blocks: a block that runs past midnight
+ * occupies the start of the *next* day too, so it's checked against
+ * same-day blocks on both its origin day and (mod 7) the following day.
+ */
 export function blocksConflict(a: StudyBlock, b: StudyBlock): boolean {
-  if (a.id === b.id || a.day !== b.day) return false;
-  const aEnd = a.startMinutes + a.durationMinutes;
-  const bEnd = b.startMinutes + b.durationMinutes;
-  return a.startMinutes < bEnd && b.startMinutes < aEnd;
+  if (a.id === b.id) return false;
+
+  const aEnd = blockEndMinutes(a);
+  const bEnd = blockEndMinutes(b);
+
+  // Same-day overlap on their origin day, using raw (possibly >1440) end
+  // times — this still works normally since a same-day comparison only
+  // needs both start times anchored to the same origin day.
+  if (a.day === b.day && a.startMinutes < bEnd && b.startMinutes < aEnd) {
+    return true;
+  }
+
+  // a spills into the day after a.day; check that spillover window against
+  // b if b lives on that next day.
+  const aNextDay = (a.day + 1) % 7;
+  if (isOvernightBlock(a) && b.day === aNextDay) {
+    const aSpillEnd = overflowMinutes(a); // 0..aSpillEnd on b.day
+    if (0 < bEnd && b.startMinutes < aSpillEnd) return true;
+  }
+
+  // Symmetric case: b spills into a.day.
+  const bNextDay = (b.day + 1) % 7;
+  if (isOvernightBlock(b) && a.day === bNextDay) {
+    const bSpillEnd = overflowMinutes(b);
+    if (0 < aEnd && a.startMinutes < bSpillEnd) return true;
+  }
+
+  return false;
 }
 
 /** Returns the set of block ids that overlap with at least one other block. */

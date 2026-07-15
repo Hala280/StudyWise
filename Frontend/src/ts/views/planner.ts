@@ -29,6 +29,9 @@ import {
   createStudyBlock,
   updateStudyBlock,
   deleteStudyBlock,
+  isOvernightBlock,
+  overflowMinutes,
+  MINUTES_PER_DAY,
   type StudyBlock,
 } from '../data/planner';
 
@@ -40,9 +43,15 @@ function requireElement<T extends Element>(element: T | null, id: string): T {
 }
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const DAY_START_MIN = 7 * 60; // 7:00am
-const DAY_END_MIN = 22 * 60; // 10:00pm
-const PX_PER_MIN = 1.6;
+// Full 24h grid (00:00 up to but not including the next 00:00). Using the
+// whole day removes the old 7am–10pm ceiling that clipped anything late,
+// and avoids the ambiguity of a shortened window: with a full day there's
+// no gap where "after 10pm" would have to be reinterpreted as "tomorrow."
+// Blocks that run past midnight are a separate concern, handled by
+// splitting them into two rendered segments — see renderGrid().
+const DAY_START_MIN = 0; // 12:00am
+const DAY_END_MIN = 24 * 60; // 12:00am the next day (exclusive upper bound)
+const PX_PER_MIN = 1.1;
 const GRID_HEIGHT = (DAY_END_MIN - DAY_START_MIN) * PX_PER_MIN;
 const SNAP_MIN = 15;
 const MIN_BLOCK_PX = 40;
@@ -88,7 +97,10 @@ function courseTitle(courseId: string): string {
 
 function hourMarks(): number[] {
   const marks: number[] = [];
-  for (let m = DAY_START_MIN; m <= DAY_END_MIN; m += 60) marks.push(m);
+  // DAY_END_MIN (1440) is the midnight boundary, not a visible row — using
+  // `<` instead of `<=` avoids drawing a duplicate "12AM" line under the
+  // one already at the top of the grid.
+  for (let m = DAY_START_MIN; m < DAY_END_MIN; m += 60) marks.push(m);
   return marks;
 }
 
@@ -243,30 +255,64 @@ export function renderPlanner(): void {
     conflictBanner.classList.remove('hidden');
   }
 
+  /**
+   * Optional override for rendering a block as a clipped segment rather
+   * than its natural full extent — used for overnight blocks, which are
+   * drawn as two pieces: a "head" segment (today, from its real start
+   * down to midnight) and a "tail" segment (tomorrow, from midnight down
+   * to where it actually ends). `interactive: false` renders the tail as
+   * a visual-only continuation strip — no drag, no click-to-edit, no
+   * remove button — so all real interaction funnels through the head,
+   * which is the only segment carrying the block's true identity.
+   */
+  interface SegmentOverride {
+    top: number;
+    height: number;
+    interactive: boolean;
+    continuesBefore?: boolean; // true for a tail: "this started yesterday"
+    continuesAfter?: boolean; // true for a head that spills into tomorrow
+  }
+
   function buildCard(
     blockItem: StudyBlock,
     hasConflict: boolean,
     colInfo: { col: number; cols: number },
     columns: HTMLElement[],
-    onOpen: (block: StudyBlock) => void
+    onOpen: (block: StudyBlock) => void,
+    segment?: SegmentOverride
   ): HTMLElement {
     const color = courseColorFor(blockItem.courseId);
     const styles = BLOCK_STYLES[color];
-    const top = (blockItem.startMinutes - DAY_START_MIN) * PX_PER_MIN;
-    const height = Math.max(blockItem.durationMinutes * PX_PER_MIN, MIN_BLOCK_PX);
+    const top = segment ? segment.top : (blockItem.startMinutes - DAY_START_MIN) * PX_PER_MIN;
+    const naturalHeight = Math.max(blockItem.durationMinutes * PX_PER_MIN, MIN_BLOCK_PX);
+    const height = segment ? Math.max(segment.height, 18) : naturalHeight;
+    const interactive = segment ? segment.interactive : true;
 
     const gapPct = 3;
     const widthPct = 100 / colInfo.cols;
     const leftPct = colInfo.col * widthPct;
 
     const card = document.createElement('div');
+    const roundedClasses = segment?.continuesBefore
+      ? 'rounded-b-lg rounded-t-none'
+      : segment?.continuesAfter
+        ? 'rounded-t-lg rounded-b-none'
+        : 'rounded-lg';
     card.className = [
-      'study-block group absolute rounded-lg border px-2.5 py-2 overflow-hidden cursor-grab active:cursor-grabbing select-none',
+      'study-block group absolute border px-2.5 py-2 overflow-hidden select-none',
+      roundedClasses,
+      interactive ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
       'shadow-sm hover:shadow-md hover:z-20 transition-shadow',
       styles.bg,
       styles.border,
       styles.text,
       hasConflict ? 'ring-2 ring-offset-1 ring-[#C15A3F] dark:ring-[#E0765E] dark:ring-offset-ink-600' : '',
+      // Overnight segments get a dashed edge on the side that's "cut" by
+      // midnight, so it visually reads as continuing rather than ending.
+      // `border-dashed` sets style for all sides, but only the relevant
+      // side has a nonzero width here, so only that edge renders dashed.
+      segment?.continuesBefore ? 'border-dashed border-t-2' : '',
+      segment?.continuesAfter ? 'border-dashed border-b-2' : '',
     ].join(' ');
     card.style.top = `${top}px`;
     card.style.height = `${height}px`;
@@ -274,7 +320,10 @@ export function renderPlanner(): void {
     card.style.width = `calc(${widthPct}% - ${colInfo.cols > 1 ? gapPct : 0}px)`;
     card.style.touchAction = 'none';
     card.dataset.blockId = blockItem.id;
-    card.title = `${courseTitle(blockItem.courseId)} — ${blockItem.topicTitle}\n${formatTime(blockItem.startMinutes)}–${formatTime(blockItem.startMinutes + blockItem.durationMinutes)}`;
+    const fullRangeLabel = `${formatTime(blockItem.startMinutes)}–${formatTime(
+      isOvernightBlock(blockItem) ? overflowMinutes(blockItem) : blockItem.startMinutes + blockItem.durationMinutes
+    )}${isOvernightBlock(blockItem) ? ' (+1 day)' : ''}`;
+    card.title = `${courseTitle(blockItem.courseId)} — ${blockItem.topicTitle}\n${fullRangeLabel}`;
 
     const compact = height < 56;
 
@@ -285,14 +334,27 @@ export function renderPlanner(): void {
           <p class="text-[10.5px] font-semibold uppercase tracking-wide truncate leading-tight">${courseTitle(blockItem.courseId)}</p>
           ${!compact ? `<p class="text-xs font-medium leading-snug mt-0.5 truncate">${blockItem.topicTitle}</p>` : ''}
         </div>
-        <button
+        ${interactive ? `<button
           type="button"
           class="remove-block shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-sm leading-none w-4 h-4 flex items-center justify-center hover:opacity-70"
           aria-label="Remove study block"
-        >&times;</button>
+        >&times;</button>` : ''}
       </div>
-      ${!compact ? `<p class="text-[10px] opacity-75 mt-1 truncate">${formatTime(blockItem.startMinutes)}–${formatTime(blockItem.startMinutes + blockItem.durationMinutes)}${hasConflict ? ' · ⚠ conflict' : ''}</p>` : ''}
+      ${!compact ? `<p class="text-[10px] opacity-75 mt-1 truncate">${
+        segment?.continuesBefore
+          ? `⋯ continues from ${formatTime(blockItem.startMinutes)} yesterday`
+          : segment?.continuesAfter
+            ? `${formatTime(blockItem.startMinutes)}–12AM, continues ⋯`
+            : `${formatTime(blockItem.startMinutes)}–${formatTime(blockItem.startMinutes + blockItem.durationMinutes)}`
+      }${hasConflict ? ' · ⚠ conflict' : ''}</p>` : ''}
     `;
+
+    if (!interactive) {
+      // Tail segments are display-only: no remove button, no drag, no
+      // click-to-open. Returning early skips wiring up all pointer
+      // handlers below, which all assume they own the block's identity.
+      return card;
+    }
 
     card.querySelector('.remove-block')?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -374,10 +436,17 @@ export function renderPlanner(): void {
     const rawY = e.clientY - colRect.top - pointerOffsetY;
     const rawMinutes = DAY_START_MIN + rawY / PX_PER_MIN;
     const snapped = Math.round(rawMinutes / SNAP_MIN) * SNAP_MIN;
-    const maxStart = DAY_END_MIN - drag.block.durationMinutes;
-    const clampedStart = clamp(snapped, DAY_START_MIN, Math.max(DAY_START_MIN, maxStart));
+    // Only clamp the start time to stay within the day it's being dropped
+    // on (0..1439) — the block's duration is free to spill past midnight,
+    // that spillover is rendered as a linked continuation segment on the
+    // next day once the drag settles (see renderGrid).
+    const clampedStart = clamp(snapped, DAY_START_MIN, DAY_END_MIN - SNAP_MIN);
 
-    // Move the card visually into the target column during drag.
+    // Move the card visually into the target column during drag. While
+    // actively dragging we show one unclipped rectangle following the
+    // pointer for simplicity (it may visually run past the bottom of the
+    // column for an overnight placement) — the accurate two-segment split
+    // is what renders once the drag ends and the grid re-renders.
     if (card.parentElement !== targetCol) {
       targetCol.appendChild(card);
     }
@@ -450,13 +519,71 @@ export function renderPlanner(): void {
       });
     });
 
+    // Overnight blocks (day D, spilling past midnight) need a "tail"
+    // phantom entry folded into day D+1's own layout pass, so it correctly
+    // reserves column space alongside that day's native blocks instead of
+    // silently overlapping them. TAIL_ID_PREFIX can't collide with a real
+    // block id since createStudyBlock's ids come from a numeric counter.
+    const TAIL_ID_PREFIX = '__tail__:';
+    const overnightBlocks = visibleBlocks.filter((b) => isOvernightBlock(b));
+
     for (let day = 0; day < 7; day++) {
       const dayBlocks = visibleBlocks.filter((b) => b.day === day);
-      const dayLayout = layoutDay(dayBlocks);
+      const incomingTails = overnightBlocks
+        .filter((b) => (b.day + 1) % 7 === day)
+        .map((b) => ({
+          id: `${TAIL_ID_PREFIX}${b.id}`,
+          courseId: b.courseId,
+          topicTitle: b.topicTitle,
+          day,
+          startMinutes: DAY_START_MIN,
+          durationMinutes: overflowMinutes(b),
+        }));
+
+      const dayLayout = layoutDay([...dayBlocks, ...incomingTails]);
+
       dayBlocks.forEach((b) => {
+        const overnight = isOvernightBlock(b);
         const colInfo = dayLayout.get(b.id) ?? { col: 0, cols: 1 };
-        const card = buildCard(b, conflictIds.has(b.id), colInfo, columns, (openedBlock) => editModal.open(openedBlock));
+        const card = buildCard(
+          b,
+          conflictIds.has(b.id),
+          colInfo,
+          columns,
+          (openedBlock) => editModal.open(openedBlock),
+          overnight
+            ? {
+                // Head segment: clipped from its real start down to
+                // midnight (the grid's own bottom edge), not its full
+                // natural height.
+                top: (b.startMinutes - DAY_START_MIN) * PX_PER_MIN,
+                height: (DAY_END_MIN - b.startMinutes) * PX_PER_MIN,
+                interactive: true,
+                continuesAfter: true,
+              }
+            : undefined
+        );
         columns[day].appendChild(card);
+      });
+
+      incomingTails.forEach((tail) => {
+        const original = overnightBlocks.find((b) => `${TAIL_ID_PREFIX}${b.id}` === tail.id);
+        if (!original) return;
+        const colInfo = dayLayout.get(tail.id) ?? { col: 0, cols: 1 };
+        const tailCard = buildCard(
+          original,
+          conflictIds.has(original.id),
+          colInfo,
+          columns,
+          () => {},
+          {
+            top: 0,
+            height: overflowMinutes(original) * PX_PER_MIN,
+            interactive: false,
+            continuesBefore: true,
+          }
+        );
+        columns[day].appendChild(tailCard);
       });
     }
 
