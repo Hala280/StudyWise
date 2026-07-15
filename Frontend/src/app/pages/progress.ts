@@ -43,25 +43,11 @@ const EMPTY_WEEK: DayStudied[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun
 
       <!-- Top row: streak + overall stats -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-        <div class="reveal-item rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6 flex flex-col justify-between" style="--delay: 0ms">
-          <div class="flex items-start justify-between">
-          <p class="text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-200">Current streak</p>
-            <span class="text-lg">•</span>
-          </div>
-          <p class="font-display text-5xl text-ink-900 dark:text-paper mt-3">{{ streakDays() }}<span class="text-xl font-body font-normal surface-muted ml-1">days</span></p>
-          <p class="text-xs surface-muted mt-2">Best streak: {{ bestStreak() }} days</p>
-        </div>
 
         <div class="reveal-item rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6 flex flex-col justify-between" style="--delay: 60ms">
           <p class="text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-200">Topics completed</p>
           <p class="font-display text-5xl text-ink-900 dark:text-paper mt-3">{{ totalDone() }}<span class="text-xl font-body font-normal surface-muted ml-1">/ {{ totalTopics() }}</span></p>
           <p class="text-xs surface-muted mt-2">Across {{ courses().length }} course{{ courses().length === 1 ? '' : 's' }}</p>
-        </div>
-
-        <div class="reveal-item rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6 flex flex-col justify-between" style="--delay: 120ms">
-          <p class="text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-200">Studied this week</p>
-          <p class="font-display text-5xl text-ink-900 dark:text-paper mt-3">{{ weekHours() }}<span class="text-xl font-body font-normal surface-muted ml-1">hrs</span></p>
-          <p class="text-xs surface-muted mt-2">{{ weekComparisonLabel() }}</p>
         </div>
       </div>
 
@@ -98,32 +84,6 @@ const EMPTY_WEEK: DayStudied[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <!-- Time studied chart -->
-        <div class="reveal-item lg:col-span-3 rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6" style="--delay: 100ms">
-          <div class="flex items-start justify-between mb-6">
-            <div>
-              <p class="font-hand text-xl accent mb-1">time studied</p>
-              <p class="text-xs surface-muted">Last 7 days</p>
-            </div>
-            <span class="text-xs text-ink-400 dark:text-ink-200">{{ weekMinutesTotal() }} min total</span>
-          </div>
-
-          <div class="flex items-end justify-between gap-2 h-40 px-1">
-            @for (day of week(); track day.label; let i = $index) {
-              <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
-                <div class="w-full flex-1 flex items-end">
-                  <div
-                    class="progress-fill w-full rounded-t-md bg-amber dark:bg-amber transition-all duration-500"
-                    [style.--delay]="(i * 70) + 'ms'"
-                    [style.height.%]="barHeight(day.minutes)"
-                    [class.opacity-30]="day.minutes === 0"
-                  ></div>
-                </div>
-                <span class="text-[11px] surface-muted">{{ day.label }}</span>
-              </div>
-            }
-          </div>
-        </div>
 
         <!-- Most difficult topics -->
         <div class="reveal-item lg:col-span-2 rounded-xl border border-ink-100 dark:border-ink-600 bg-white dark:bg-ink-600 p-6" style="--delay: 140ms">
